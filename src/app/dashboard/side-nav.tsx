@@ -10,7 +10,7 @@ export function SideNav() {
   const path = usePathname();
 
     return (
-        <div className="w-40 flex md:flex-col gap-4">
+        <div className="md:w-40 flex md:flex-col gap-4 flex-row flex-wrap md:flex-nowrap">
           <Link href="/dashboard/files">
             <Button variant={"link"} className={clsx("flex gap-2", {
               "text-blue-500": path === "/dashboard/files",
