@@ -75,7 +75,7 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
     <div>
       {!isLoading && (
         <>
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex flex-col gap-y-4 md:flex-row justify-between items-center mb-8">
             <h1 className="text-4xl font-bold">{title}</h1>
             <SearchBar query={query} setQuery={setQuery} />
             <UploadButton />
@@ -123,7 +123,7 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
             )}
 
             <TabsContent value="grid">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid md:grid-cols-3 gap-4">
                 {modifiedFiles?.map((files) => {
                   return <FileCard key={files._id} file={files} />;
                 })}

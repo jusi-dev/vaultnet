@@ -17,7 +17,7 @@ export default function DashboardLayout({
 }) {
   return (
     <main className="container mx-auto pt-12">
-      <div className="flex gap-8">
+      <div className="flex flex-col md:flex-row gap-8">
         <SideNav />
 
         <div className="w-full">

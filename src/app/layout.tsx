@@ -7,7 +7,7 @@ import { Header } from "./header";
 import { Toaster } from "@/components/ui/toaster"
 import { Footer } from "./Footer";
 
-const inter = Roboto({ weight: "900", style: "normal", preload: false });
+const inter = Roboto({ weight: ["100", "300", "400", "500", "700", "900"], style: "normal", preload: false });
 
 export const metadata: Metadata = {
   title: "Create Next App",

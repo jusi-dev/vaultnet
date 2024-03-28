@@ -76,6 +76,10 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      spacing: {
+        "backdrop": '20vw',
+        "backdrop-sm": '40vw',
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

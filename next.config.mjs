@@ -5,6 +5,9 @@ const nextConfig = {
             {
                 hostname: "merry-platypus-550.convex.cloud",
             },
+            {
+                hostname: "images.placeholders.dev",
+            },
         ],
     },
 };
