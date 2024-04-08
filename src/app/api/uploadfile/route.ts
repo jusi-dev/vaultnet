@@ -4,12 +4,6 @@ import { NextApiResponse } from 'next';
 
 const s3Client = new S3Client();
 
-export const config = {
-  api: {
-    bodyParser: false, // Disabling the default bodyParser
-  },
-};
-
 export async function POST(req : Request, res: NextApiResponse){
 
     const formData = await req.formData();
@@ -54,3 +48,9 @@ export async function POST(req : Request, res: NextApiResponse){
       return new Response('File upload failed ' + uploadError, { status: 500 });
     };
 }
+
+POST.config = {
+  api: {
+    bodyParser: false, // Disabling the default bodyParser
+  },
+};
