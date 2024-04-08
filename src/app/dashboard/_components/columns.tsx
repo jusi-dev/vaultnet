@@ -26,7 +26,7 @@ function ActionsCell({row} : {row: {original: Doc<"files"> & { isFavorited: bool
 
     useEffect(() => {
         (async () => {
-            const url = await getFileUrl(row.original.fileId);
+            const url = await getFileUrl(row.original.fileId, 600);
             setDownloadUrl(url);
         })();
     
