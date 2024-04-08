@@ -49,28 +49,51 @@ export function UploadButton() {
 
   const fileRef = form.register("file");
 
+  const uploadToS3 = async (file: File, fileName: string) => {
+
+    if (!orgId) {
+      return null;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('fileName', "fileName.txt");
+    formData.append('orgId', orgId)
+  
+    const response = await fetch('/api/uploadfile', {
+      method: 'POST',
+      body: formData, // Pass the formData object directly
+    });
+  
+    return response.json(); // Parse the JSON response
+  };
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
     console.log(values)
 
     if(!orgId) return;
 
-    const postUrl = await generateUploadUrl();
+    // OLD CODE TO UPLOAD TO CONVEX STORAGE
+
+    // const postUrl = await generateUploadUrl();
 
     const fileType = values.file[0].type;
 
-    const result = await fetch(postUrl, {
-      method: "POST",
-      headers: { "Content-Type": fileType },
-      body: values.file[0],
-    });
+    // const result = await fetch(postUrl, {
+    //   method: "POST",
+    //   headers: { "Content-Type": fileType },
+    //   body: values.file[0],
+    // });
 
-    const { storageId } = await result.json();
+    // const { storageId } = await result.json();
 
-    console.log(storageId);
-    console.log(postUrl)
-    console.log(fileType)
+    const uploadResponse = await uploadToS3(values.file[0], "Pandi.txt");
+
+    console.log(uploadResponse)
+
+    // console.log(storageId);
+    // console.log(postUrl)
+    // console.log(fileType)
 
     const types = {
       "image/png": "image",
@@ -84,7 +107,7 @@ export function UploadButton() {
     try {
       await createFile({
         name: values.title,
-        fileId: storageId,
+        fileId: "test",
         orgId,
         type: types[fileType],
       });

@@ -39,6 +39,7 @@ export function FileCard({ file }: {file: Doc<"files"> & {isFavorited: boolean}}
         image: <ImageIcon />,
         pdf: <FileTextIcon />,
         csv: <GanttChartIcon />,
+        word: <FileTextIcon />,
       } as Record<Doc<"files">["type"], ReactNode>
 
     return (

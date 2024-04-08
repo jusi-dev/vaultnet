@@ -68,7 +68,7 @@ export const createFile = mutation({
     args: {
         name: v.string(),
         orgId: v.string(),
-        fileId: v.id("_storage"),
+        fileId: v.string(),
         type: fileTypes,
     },
     async handler(ctx, args) {
