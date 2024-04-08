@@ -19,24 +19,39 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
   
-import { DownloadIcon, MoreVertical, StarHalf, StarIcon, Trash2Icon, UndoIcon } from "lucide-react";
+import { DownloadIcon, MoreVertical, Share2Icon, ShareIcon, StarHalf, StarIcon, Trash2Icon, UndoIcon } from "lucide-react";
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useToast } from "@/components/ui/use-toast";
 import { Protect } from "@clerk/nextjs";
+import { ShareButton } from "./share-button";
 
 export function useFileUrlGenerator () {
-    const generateDownloadUrl = useMutation(api.files.generateDownloadUrl);
+    // const generateDownloadUrl = useMutation(api.files.generateDownloadUrl);
 
-    const getFileUrl = async (fileId: Id<"_storage">) => {
+    const getFileUrl = async (fileId: Id<"_storage"> | string, shareTime: number) => {
         if (!fileId) {
             return '';
         }
+
+        if (!shareTime) {
+            shareTime = 600
+        }
+
         try {
-            const res = await generateDownloadUrl({ fileId })
-            console.log(res);
-            return res || '';
+            const formData = new FormData();
+            await formData.append('fileId', fileId);
+            await formData.append('orgId', "1245") // TODO: Add real orgId
+            await formData.append('shareTime', shareTime.toString())
+            console.log(formData)
+            // const res = await generateDownloadUrl({ fileId })
+            const res = await fetch('/api/downloadfile', {
+                method: 'POST',
+                body: formData
+            }).then(res => res.json())
+            console.log(res)
+            return res.downloadUrl as string || '';
         } catch (error) {
             console.error("Error generating download URL:", error);
             return ''; // Return an empty string in case of error
@@ -53,6 +68,7 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
     const deleteFile = useMutation(api.files.deleteFile);
     const restoreFile = useMutation(api.files.restoreFile);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isShareOpen, setIsShareOpen] = useState(false);
     const me = useQuery(api.users.getMe)
     return (
         <>
@@ -79,6 +95,8 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            <ShareButton isShareOpen={isShareOpen} setIsShareOpen={setIsShareOpen} fileId={file.fileId}/>
 
             <DropdownMenu>
                 <DropdownMenuTrigger><MoreVertical /></DropdownMenuTrigger>
@@ -108,6 +126,15 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                     >
                         <div className="flex gap-1 items-center">
                             <DownloadIcon className="w-4 h-4"/> Download
+                        </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        onClick={() => {
+                            setIsShareOpen(true)
+                        }}
+                    >
+                        <div className="flex gap-1 items-center">
+                            <ShareIcon className="w-4 h-4"/> Share
                         </div>
                     </DropdownMenuItem>
                     <Protect

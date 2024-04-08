@@ -40,13 +40,16 @@ export async function POST(req : Request, res: NextApiResponse){
         Key: fileKey, 
         Metadata: {
           'OrgId': orgId as string,
-          'Content-Type': (file as unknown as File).type
-        }
+          // 'Content-Type': (file as unknown as File).type
+        },
+        ContentType: (file as unknown as File).type
       });
 
       await s3Client.send(uploadCommand);
 
-      return new Response('File uploaded successfully with Key ' + fileKey, { status: 200 });
+      return new Response(JSON.stringify({
+        fileKey
+      }), { status: 200 });
     } catch (uploadError) {
       return new Response('File upload failed ' + uploadError, { status: 500 });
     };

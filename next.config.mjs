@@ -8,6 +8,9 @@ const nextConfig = {
             {
                 hostname: "images.placeholders.dev",
             },
+            {
+                hostname: "vaultnet.s3.eu-central-2.amazonaws.com",
+            },
         ],
     },
 };

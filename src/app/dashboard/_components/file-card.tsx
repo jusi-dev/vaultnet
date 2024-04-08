@@ -23,7 +23,7 @@ export function FileCard({ file }: {file: Doc<"files"> & {isFavorited: boolean}}
 
     useEffect(() => {
         (async () => {
-            const url = await getFileUrl(file.fileId);
+            const url = await getFileUrl(file.fileId, 600);
             setFileUrl(url);
         })();
     }, [file.fileId, getFileUrl]);
@@ -32,8 +32,6 @@ export function FileCard({ file }: {file: Doc<"files"> & {isFavorited: boolean}}
         userId: file.userId
     });
 
-    console.log(userProfile)
-    console.log(userProfile?.image)
 
     const typeIcons = {
         image: <ImageIcon />,

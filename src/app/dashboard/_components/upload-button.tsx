@@ -49,7 +49,7 @@ export function UploadButton() {
 
   const fileRef = form.register("file");
 
-  const uploadToS3 = async (file: File, fileName: string) => {
+  const uploadToS3 = async (file: File) => {
 
     if (!orgId) {
       return null;
@@ -87,9 +87,11 @@ export function UploadButton() {
 
     // const { storageId } = await result.json();
 
-    const uploadResponse = await uploadToS3(values.file[0], "Pandi.txt");
+    const uploadResponseFileKey = await uploadToS3(values.file[0]);
 
-    console.log(uploadResponse)
+    console.log(uploadResponseFileKey.fileKey)
+
+    console.log("File uploaded to S3")
 
     // console.log(storageId);
     // console.log(postUrl)
@@ -104,13 +106,17 @@ export function UploadButton() {
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "word",
     } as Record<string, Doc<'files'>['type']>
 
+    console.log("Creating DB entry")
+
     try {
       await createFile({
         name: values.title,
-        fileId: "test",
+        fileId: uploadResponseFileKey.fileKey,
         orgId,
         type: types[fileType],
       });
+
+      console.log("DB entry created")
 
       form.reset();
 
@@ -146,54 +152,54 @@ export function UploadButton() {
         form.reset();
     }}>
         <DialogTrigger asChild>
-        <Button onClick={()=> {
-            }}>Upload File
-        </Button>
+          <Button onClick={()=> {
+              }}>Upload File
+          </Button>
         </DialogTrigger>
         <DialogContent>
-        <DialogHeader>
-            <DialogTitle className="mb-8">Upload your File</DialogTitle>
-            <DialogDescription>
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field}) => (
-                    <FormItem>
-                        <FormLabel>Title:</FormLabel>
-                        <FormControl>
-                        <Input placeholder="hello world" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
+          <DialogHeader>
+              <DialogTitle className="mb-8">Upload your File</DialogTitle>
+              <DialogDescription>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field}) => (
+                        <FormItem>
+                            <FormLabel>Title:</FormLabel>
+                            <FormControl>
+                            <Input placeholder="hello world" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
 
-                <FormField
-                    control={form.control}
-                    name="file"
-                    render={() => (
-                    <FormItem>
-                        <FormLabel>Choose a File:</FormLabel>
-                        <FormControl>
-                        <Input 
-                            type="file"  {...fileRef}
-                        />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-                <Button type="submit"
-                    disabled={form.formState.isSubmitting} className="flex gap-1">
-                    {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" /> }
-                    Submit
-                </Button>
-                </form>
-            </Form>
-            </DialogDescription>
-        </DialogHeader>
+                    <FormField
+                        control={form.control}
+                        name="file"
+                        render={() => (
+                        <FormItem>
+                            <FormLabel>Choose a File:</FormLabel>
+                            <FormControl>
+                            <Input 
+                                type="file"  {...fileRef}
+                            />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <Button type="submit"
+                        disabled={form.formState.isSubmitting} className="flex gap-1">
+                        {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" /> }
+                        Submit
+                    </Button>
+                    </form>
+                </Form>
+              </DialogDescription>
+          </DialogHeader>
         </DialogContent>
     </Dialog>
   );

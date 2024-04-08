@@ -17,7 +17,7 @@ export const generateUploadUrl = mutation(async (ctx) => {
 
 export const generateDownloadUrl = mutation({
     args: {
-        fileId: v.id("_storage"),
+        fileId: v.union(v.id("_storage"), v.string()),
     },
     async handler(ctx, args) {
         const identitiy = await ctx.auth.getUserIdentity()
