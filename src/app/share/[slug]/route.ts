@@ -31,7 +31,7 @@ export const POST = async (req : Request, res : NextResponse) => {
     };
 };
 
-export const GET = async (_, {params} : any) => {
+export const GET = async (_ : any, {params} : any) => {
     let result;
 
     try {
