@@ -82,7 +82,7 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
           </div>
 
           <Tabs defaultValue="grid" className="w-full">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col md:flex-row justify-between items-center">
               <TabsList className="mb-4">
                 <TabsTrigger value="grid" className="flex gap-1 items-center">
                   <GridIcon /> Grid
