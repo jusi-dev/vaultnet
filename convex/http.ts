@@ -42,7 +42,7 @@ http.route({
           });
           break;
         case "organizationMembership.created":
-            console.log("Getting Executed");
+          console.log("Getting Executed");
           await ctx.runMutation(internal.users.addOrgIdToUser, {
             tokenIdentifier: `https://${process.env.CLERK_HOSTNAME}|${result.data.public_user_data.user_id}`,
             orgId: result.data.organization.id,

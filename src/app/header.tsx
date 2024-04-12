@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from "@/components/ui/button";
-import { OrganizationSwitcher, SignInButton, SignedOut, UserButton } from "@clerk/nextjs";
+import { OrganizationSwitcher, SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -48,23 +48,25 @@ export function Header() {
                 </div>
             }
 
-            <div className="hidden md:flex">
-                <Button variant={"outline"} className="ml-10">
-                    <Link href="/dashboard/files">Your Files</Link>
-                </Button>
+            <div className="hidden md:flex gap-x-4 justify-center items-center">
+                <SignedIn>
+                    <Button variant={"outline"} className="ml-10">
+                        <Link href="/dashboard/files">Your Files</Link>
+                    </Button>
+                </SignedIn>
 
-                <div className="flex gap-2 ml-auto">
+                <div className="flex gap-4 ml-auto">
                     <OrganizationSwitcher />
                     <UserButton 
                         afterSignOutUrl="/"
-                        showName={true}
+                        // showName={true}
                     />
                     <SignedOut>
                         <SignInButton
                             mode="modal"
                             redirectUrl="/dashboard/files"
                         >
-                            <Button>Sign In</Button>
+                            <Button variant={"orange"}>Sign In</Button>
                         </SignInButton>
                     </SignedOut>
                 </div>

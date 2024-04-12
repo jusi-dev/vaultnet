@@ -1,4 +1,4 @@
-"use client"
+// "use client"
 
 import Image from "next/image";
 import { BackgroundDrop } from "./background";
@@ -13,6 +13,11 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "VaultNet - Secure Swiss Storage",
+};
 
 
 export default function Home() {

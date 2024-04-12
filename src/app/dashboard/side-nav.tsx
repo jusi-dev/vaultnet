@@ -13,21 +13,21 @@ export function SideNav() {
         <div className="md:w-40 flex md:flex-col gap-4 flex-row flex-wrap md:flex-nowrap">
           <Link href="/dashboard/files">
             <Button variant={"link"} className={clsx("flex gap-2", {
-              "text-blue-500": path === "/dashboard/files",
+              "text-orange-500": path === "/dashboard/files",
             })}>
               <FileIcon /> All Files
             </Button>
           </Link>
           <Link href="/dashboard/favorites">
             <Button variant={"link"} className={clsx("flex gap-2", {
-              "text-blue-500": path === "/dashboard/favorites",
+              "text-orange-500": path === "/dashboard/favorites",
             })}>
               <StarIcon /> Favorites
             </Button>
           </Link>
           <Link href="/dashboard/trash">
             <Button variant={"link"} className={clsx("flex gap-2", {
-              "text-blue-500": path === "/dashboard/trash",
+              "text-orange-500": path === "/dashboard/trash",
             })}>
               <Trash2 /> Deleted Files
             </Button>

@@ -24,6 +24,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { fileTypes } from "../../../../convex/schema";
 import { Doc } from "../../../../convex/_generated/dataModel";
+import { createFileInDB } from "@/actions/aws/files";
 
 const formSchema = z.object({
   title: z.string().min(1).max(200),
@@ -50,7 +51,6 @@ export function UploadButton() {
   const fileRef = form.register("file");
 
   const uploadToS3 = async (file: File) => {
-
     if (!orgId) {
       return null;
     }
@@ -73,29 +73,9 @@ export function UploadButton() {
 
     if(!orgId) return;
 
-    // OLD CODE TO UPLOAD TO CONVEX STORAGE
-
-    // const postUrl = await generateUploadUrl();
-
     const fileType = values.file[0].type;
 
-    // const result = await fetch(postUrl, {
-    //   method: "POST",
-    //   headers: { "Content-Type": fileType },
-    //   body: values.file[0],
-    // });
-
-    // const { storageId } = await result.json();
-
     const uploadResponseFileKey = await uploadToS3(values.file[0]);
-
-    console.log(uploadResponseFileKey.fileKey)
-
-    console.log("File uploaded to S3")
-
-    // console.log(storageId);
-    // console.log(postUrl)
-    // console.log(fileType)
 
     const types = {
       "image/png": "image",
@@ -109,18 +89,27 @@ export function UploadButton() {
     console.log("Creating DB entry")
 
     try {
-      await createFile({
-        name: values.title,
-        fileId: uploadResponseFileKey.fileKey,
+      // await createFile({
+      //   name: values.title,
+      //   fileId: uploadResponseFileKey.fileKey,
+      //   orgId,
+      //   type: types[fileType],
+      // });
+
+      await createFileInDB(
+        values.title,
+        uploadResponseFileKey.fileKey,
         orgId,
-        type: types[fileType],
-      });
+        types[fileType],
+      )
 
       console.log("DB entry created")
 
       form.reset();
 
       setIsFileDialogOpen(false);
+
+      window.dispatchEvent(new CustomEvent('fileUploaded'));
   
       toast({
         variant: "success",
@@ -128,11 +117,19 @@ export function UploadButton() {
         description: "Your file has been uploaded successfully",
       })
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Something went wrong",
-        description: "Your file could not be uploaded. Please try again later.",
-      })
+      if(uploadResponseFileKey.error === 909) {
+        toast({
+          variant: "destructive",
+          title: "You have insufficent space left",
+          description: "Please delete some files to free up space or activate pay as you go.",
+        })
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Something went wrong",
+          description: "Your file could not be uploaded. Please try again later.",
+        })
+      }
     }
 
   }
@@ -140,6 +137,7 @@ export function UploadButton() {
   let orgId : string | undefined = undefined;
   if (organization.isLoaded && user.isLoaded) {
     orgId = organization.organization?.id ?? user.user?.id;
+    console.log('This is the browser user id: ', user.user?.id)
   }
 
   const [isFileDialogOpen, setIsFileDialogOpen] = useState(false);

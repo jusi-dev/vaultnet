@@ -6,16 +6,37 @@ import { api } from "../../../../convex/_generated/api"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { FileCardActions, useFileUrlGenerator } from "./file-actions"
 import { useEffect, useState } from "react"
+import { getUserById } from "@/actions/aws/users"
 
-function UserCell({userId} : {userId: Id<"users">}) {
-    const userProfile = useQuery(api.users.getUserProfile, { userId: userId })
+interface User {
+    name: string;
+    image: string;
+    tokenIdentifier: string;
+    mbsUploaded: number;
+    orgIds: string[];
+    subscriptionType: string;
+    userid: string;
+}
+
+function UserCell({userId} : {userId: string}) {
+    const [userProfile, setUserProfile] = useState({});
+    
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            const user = await getUserById(userId);
+            setUserProfile(user);
+        };
+    
+        fetchUserProfile();
+    }, []);
+
     return  (
         <div className="flex gap-2 text-xs text-gray-700 w-40 items-center">
             <Avatar className="w-6 h-6">
-                <AvatarImage src={userProfile?.image} />
+                <AvatarImage src={(userProfile as User)?.image} />
                 <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            {userProfile?.name ?? "Unknown User"}
+            {(userProfile as User)?.name ?? "Unknown User"}
         </div>
     )
 }

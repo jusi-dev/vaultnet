@@ -20,16 +20,16 @@ import {
 } from "@/components/ui/alert-dialog"
   
 import { DownloadIcon, MoreVertical, Share2Icon, ShareIcon, StarHalf, StarIcon, Trash2Icon, UndoIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useToast } from "@/components/ui/use-toast";
 import { Protect } from "@clerk/nextjs";
 import { ShareButton } from "./share-button";
+import { deleteFile, restoreFile, toggleFavorite } from "@/actions/aws/files";
+import { getMe } from "@/actions/aws/users";
 
 export function useFileUrlGenerator () {
-    // const generateDownloadUrl = useMutation(api.files.generateDownloadUrl);
-
     const getFileUrl = async (fileId: Id<"_storage"> | string, shareTime: number) => {
         if (!fileId) {
             return '';
@@ -44,16 +44,13 @@ export function useFileUrlGenerator () {
             await formData.append('fileId', fileId);
             await formData.append('orgId', "1245") // TODO: Add real orgId
             await formData.append('shareTime', shareTime.toString())
-            console.log(formData)
             // const res = await generateDownloadUrl({ fileId })
             const res = await fetch('/api/downloadfile', {
                 method: 'POST',
                 body: formData
             }).then(res => res.json())
-            console.log(res)
             return res.downloadUrl as string || '';
         } catch (error) {
-            console.error("Error generating download URL:", error);
             return ''; // Return an empty string in case of error
         }
     }
@@ -64,12 +61,21 @@ export function useFileUrlGenerator () {
 export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorited: boolean ,file: Doc<"files">, downloadUrl: string }) {
     const { toast } = useToast();
 
-    const toggleFavorite = useMutation(api.files.toggleFavorite);
-    const deleteFile = useMutation(api.files.deleteFile);
-    const restoreFile = useMutation(api.files.restoreFile);
+    // const toggleFavorite = useMutation(api.files.toggleFavorite);
+    // const deleteFile = useMutation(api.files.deleteFile);
+    // const restoreFile = useMutation(api.files.restoreFile);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
-    const me = useQuery(api.users.getMe)
+    const [me, setMe] = useState<any>(null);
+
+    useEffect(() => {
+        (async () => {
+            const user = await getMe();
+            console.log("File actions user: ", user);
+            setMe(user);
+        })();
+    }, [])
+
     return (
         <>
             <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen} >
@@ -83,9 +89,8 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                     <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction onClick={ async () => {
-                        await deleteFile({
-                            fileId: file._id
-                        });
+                        await deleteFile(file.fileId)
+                        window.dispatchEvent(new CustomEvent('fileUploaded'));
                         toast({
                             variant: "destructive",
                             title: "File Deleted",
@@ -103,8 +108,8 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                 <DropdownMenuContent>
                     <DropdownMenuItem
                         onClick={() => {
-                            toggleFavorite({ fileId: file._id });
-                        
+                            toggleFavorite(file.fileId)
+                            window.dispatchEvent(new CustomEvent('fileUploaded'));
                         }} 
                         className="flex gap-1 text-yellow-500 items-center cursor-pointer"
                     >
@@ -139,9 +144,11 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                     </DropdownMenuItem>
                     <Protect
                         condition={(check) => {
+                            console.log("This is file.userId", file.userId)
+                            console.log("This is me.userId", me?.userId)
                             return check({
                                 role: "org:admin"
-                            }) || file.userId === me?._id
+                            }) || file.userId === me?.userid
                         }}
                         fallback={
                             <></>
@@ -151,7 +158,8 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                         <DropdownMenuItem
                             onClick={() => {
                                 if (file.shouldDelete) {
-                                    restoreFile({ fileId: file._id });
+                                    restoreFile(file.fileId);
+                                    window.dispatchEvent(new CustomEvent('fileUploaded'));
                                     toast({
                                         variant: "success",
                                         title: "File Restored",

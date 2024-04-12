@@ -16,21 +16,40 @@ import { ReactNode, useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { FileCardActions, useFileUrlGenerator } from "./file-actions";
+import { getUserById } from "@/actions/aws/users";
 
-export function FileCard({ file }: {file: Doc<"files"> & {isFavorited: boolean}}) {
+interface User {
+    name: string;
+    image: string;
+    tokenIdentifier: string;
+    mbsUploaded: number;
+    orgIds: string[];
+    subscriptionType: string;
+    userid: string;
+}
+
+export function FileCard({ file }: {file: any & {isFavorited: boolean}}) {
     const [fileUrl, setFileUrl] = useState<string>('');
+    const [userProfile, setUserProfile] = useState({});
     const getFileUrl = useFileUrlGenerator();
 
     useEffect(() => {
-        (async () => {
+        const fetchFileUrl = async () => {
             const url = await getFileUrl(file.fileId, 600);
             setFileUrl(url);
-        })();
-    }, [file.fileId, getFileUrl]);
-
-    const userProfile = useQuery(api.users.getUserProfile, {
-        userId: file.userId
-    });
+        };
+    
+        fetchFileUrl();
+    }, [file.fileId, getFileUrl]);  // This now only re-fetches when fileId or getFileUrl changes
+    
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            const user = await getUserById(file.userId);
+            setUserProfile(user);
+        };
+    
+        fetchUserProfile();
+    }, [file.userId]);
 
 
     const typeIcons = {
@@ -44,7 +63,7 @@ export function FileCard({ file }: {file: Doc<"files"> & {isFavorited: boolean}}
         <Card>
             <CardHeader className="relative">
                 <CardTitle className="flex gap-2 text-gray-700 font-normal">
-                    <div className="flex justify-center">{typeIcons[file.type]}</div>
+                    <div className="flex justify-center">{typeIcons[file.type as keyof typeof typeIcons]}</div>
                     {file.name}
                 </CardTitle>
                 <div className="absolute top-2 right-2">
@@ -68,10 +87,10 @@ export function FileCard({ file }: {file: Doc<"files"> & {isFavorited: boolean}}
             <CardFooter className="flex justify-between">
                 <div className="flex gap-2 text-xs text-gray-700 w-40 items-center">
                     <Avatar className="w-6 h-6">
-                        <AvatarImage src={userProfile?.image} />
+                        <AvatarImage src={(userProfile as User)?.image} />
                         <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
-                    {userProfile?.name ?? "Unknown User"}
+                    {(userProfile as User)?.name ?? "Unknown User"}
                 </div>
                 <div className="text-xs text-gray-700">
                     Uploaded on {formatRelative(new Date(file._creationTime), new Date())}

@@ -9,7 +9,7 @@ import { FileCard } from "./file-card";
 import Image from "next/image";
 import { GridIcon, ListIcon, Loader2 } from "lucide-react";
 import { SearchBar } from "./search-bar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DataTable } from "./file-table";
 import { columns } from "./columns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/select"
 import { Doc } from "../../../../convex/_generated/dataModel";
 import { Label } from "@/components/ui/label";
+import { getAllFavorites, getFilesFromAWS } from "@/actions/aws/files";
+import { set } from "date-fns";
 
 
 function Placeholder() {
@@ -39,48 +41,73 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
   const organization = useOrganization();
   const user = useUser();
 
-  const [query, setQuery] = useState<string>("");
-  const [type, setType] = useState<Doc<"files">["type"] | 'all'>("all");
-
-  let orgId : string | undefined = undefined;
-  if (organization.isLoaded && user.isLoaded) {
-    orgId = organization.organization?.id ?? user.user?.id;
+  interface File {
+    fileId: string;
+    title: string;
+    type: string;
+    userId: string;
+    isFavorited: boolean;
   }
 
-  const favorites = useQuery(api.files.getAllFavorites, 
-    orgId ? { orgId } : 'skip',
-  );
+  const [files, setFiles] = useState<File[]>([]);
+  const [favorites, setFavorites] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [query, setQuery] = useState("");
+  const [type, setType] = useState("all");
 
-  const files = useQuery(
-    api.files.getFiles,
-    orgId
-      ? {
-          orgId,
-          type: type === "all" ? undefined : type,
-          query,
-          favorites: filterFavorites,
-          deletedOnly,
-        }
-      : "skip"
-  );
+  let orgId = organization.isLoaded && user.isLoaded ? (organization.organization?.id ?? user.user?.id) : undefined;
 
-  const isLoading = files === undefined;
+  const fetchFiles = () => {
+    if (orgId) {
+      getFilesFromAWS(orgId, query, filterFavorites, deletedOnly, type === "all" ? undefined : type)
+        .then(fetchedFiles => {
+          setFiles(fetchedFiles as File[]);
+          setIsLoading(false);
+        });
+    }
+  }
 
-  const modifiedFiles = files?.map(file => ({
+  const fetchFavorites = () => {
+    if (orgId) {
+      getAllFavorites(orgId)
+        .then(favorites => {
+          if (!favorites) return [];
+          setFavorites(favorites);
+          console.log("These are the favorites: ", favorites)
+        });
+    }
+  }
+
+  useEffect(() => {
+    // Inital set loading
+    setIsLoading(true);
+    // Set up the event listener for file upload events
+    window.addEventListener('fileUploaded', fetchFiles);
+
+    // Fetch files initially
+    fetchFavorites();
+    fetchFiles()
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+        window.removeEventListener('fileUploaded', fetchFiles);
+    };
+  }, [orgId, query, filterFavorites, deletedOnly, type]);
+
+  const modifiedFiles = files.map(file => ({
     ...file,
-    isFavorited: (favorites ?? []).some(f => f.fileId === file._id)
-  })) ?? [];
+    isFavorited: (favorites?.some(f => f.fileId === file.fileId) ?? false)
+  }));
+
 
   return (
     <div>
-      {!isLoading && (
         <>
           <div className="flex flex-col gap-y-4 md:flex-row justify-between items-center mb-8">
             <h1 className="text-4xl font-bold">{title}</h1>
             <SearchBar query={query} setQuery={setQuery} />
             <UploadButton />
           </div>
-
           <Tabs defaultValue="grid" className="w-full">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <TabsList className="mb-4">
@@ -124,8 +151,8 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
 
             <TabsContent value="grid">
               <div className="grid md:grid-cols-3 gap-4">
-                {modifiedFiles?.map((files) => {
-                  return <FileCard key={files._id} file={files} />;
+                {modifiedFiles?.map((file) => {
+                  return <FileCard key={file.fileId} file={file} />;
                 })}
               </div>
             </TabsContent>
@@ -135,9 +162,8 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
             </TabsContent>
           </Tabs>
 
-          {files?.length === 0 && <Placeholder />}
+          {files?.length === 0 && !isLoading && <Placeholder />}
         </>
-      )}
     </div>
   );
 }
