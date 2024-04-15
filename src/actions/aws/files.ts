@@ -1,12 +1,15 @@
 'use server';
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { getUserById, getUserId } from "./users";
+import { getUserById, getUserId, updatedMbsUploaded } from "./users";
 import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { DeleteObjectCommand, HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 
 const dbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(dbClient);
+
+const s3Client = new S3Client();
 
 
 async function hasAccessToOrg(orgId: string) {
@@ -237,4 +240,48 @@ export const restoreFile = async (fileId: string) => {
             shouldDelete: false
         }
     }));
+}
+
+export const deleteFilePermanently = async (fileId: string) => {
+    const access = await hasAccessToFile(fileId);
+
+    if (!access) {
+        throw new Error("Not authorized");
+    }
+
+    const file = await getSingleFile(fileId);
+
+    canDeleteFile(access.user, file);
+
+    await docClient.send(new DeleteCommand({
+        TableName: 'vaultnet-files',
+        Key: {
+            fileId,
+        }
+    }));
+
+    await docClient.send(new DeleteCommand({
+        TableName: 'vaultnet-favorites',
+        Key: {
+            fileId,
+        }
+    }));
+
+    const deleteParams = {
+        Bucket: "vaultnet",
+        Key: fileId
+    }
+
+    const headData = await s3Client.send(new HeadObjectCommand(deleteParams))
+    const fileSize = headData.ContentLength
+    
+    const fileData = {
+        fileSize
+    }
+
+    await updatedMbsUploaded(fileData, false)
+
+    // Delete from S3
+    const deleteData = await s3Client.send(new DeleteObjectCommand(deleteParams))
+
 }

@@ -27,7 +27,7 @@ export async function POST(req : Request, res: NextApiResponse){
     }
 
     try {
-      await updatedMbsUploaded(updateSizeData)
+      await updatedMbsUploaded(updateSizeData, true)
     } catch (error) {
       return new Response(JSON.stringify({error: 909}), { status: 500 });
     }
@@ -56,5 +56,6 @@ export async function POST(req : Request, res: NextApiResponse){
 POST.config = {
   api: {
     bodyParser: false, // Disabling the default bodyParser
+    sizeLimit: '1000mb',
   },
 };

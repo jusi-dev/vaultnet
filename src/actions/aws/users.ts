@@ -181,25 +181,39 @@ export const isUserInOrg = async (data: any) => {
     return response.Item;
 }
 
-export const updatedMbsUploaded = async (data: any) => {
+export const updatedMbsUploaded = async (data: any, addToUser: boolean) => {
     const { fileSize } = data;
     const currentUser = await getUserId();
 
     const userData = await getUserById(currentUser);
 
-    const hasEnoughSpace = await hasUserEnoughSpace(userData, fileSize);
+    if (addToUser) {
+        const hasEnoughSpace = await hasUserEnoughSpace(userData, fileSize);
 
-    if (!hasEnoughSpace) {
-        throw new Error("User does not have enough space");
+        if (!hasEnoughSpace) {
+            throw new Error("User does not have enough space");
+        }
     }
 
-    const updateCommand = new PutCommand({
-        TableName: 'vaultnet-users',
-        Item: {
-            ...userData,
-            mbsUploaded: userData.mbsUploaded + fileSize
-        }
-    });
+    let updateCommand;
+
+    if (addToUser) {
+        updateCommand = new PutCommand({
+            TableName: 'vaultnet-users',
+            Item: {
+                ...userData,
+                mbsUploaded: userData.mbsUploaded + fileSize
+            }
+        });
+    } else {
+        updateCommand = new PutCommand({
+            TableName: 'vaultnet-users',
+            Item: {
+                ...userData,
+                mbsUploaded: userData.mbsUploaded - fileSize
+            }
+        });
+    }
 
     await docClient.send(updateCommand);
 }

@@ -26,7 +26,7 @@ import { api } from "../../../../convex/_generated/api";
 import { useToast } from "@/components/ui/use-toast";
 import { Protect } from "@clerk/nextjs";
 import { ShareButton } from "./share-button";
-import { deleteFile, restoreFile, toggleFavorite } from "@/actions/aws/files";
+import { deleteFile, deleteFilePermanently, restoreFile, toggleFavorite } from "@/actions/aws/files";
 import { getMe } from "@/actions/aws/users";
 
 export function useFileUrlGenerator () {
@@ -181,6 +181,29 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                                 </div>
                             }
                         </DropdownMenuItem>
+
+                        {file.shouldDelete && (
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    if (file.shouldDelete) {
+                                        deleteFilePermanently(file.fileId);
+                                        window.dispatchEvent(new CustomEvent('fileUploaded'));
+                                        toast({
+                                            variant: "success",
+                                            title: "File Deleted Permanently",
+                                            description: "Your file has been deleted permanently.",
+                                        })
+                                    }
+                                }}
+                                className="flex gap-1 items-center cursor-pointer text-red-600"
+                            >
+                                <div className="flex gap-1 text-red-600">
+                                    <Trash2Icon className="w-4 h-4"/> Delete Permanently
+                                </div>
+
+                            </DropdownMenuItem>
+                        )}
+                        
                     </Protect>
                 </DropdownMenuContent>
             </DropdownMenu>
