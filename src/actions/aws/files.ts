@@ -21,12 +21,7 @@ async function hasAccessToOrg(orgId: string) {
     if (!user) {
         return null;
     }
-
-    console.log(user.orgIds)
-    console.log(user.userid)
-    console.log(orgId)
     const hasAccess = user.orgIds?.some((item: any) => item.orgId === orgId) || user.userid.includes(orgId)
-    console.log("User has access: ", hasAccess)
 
     if (!hasAccess) {
         return null;
@@ -57,13 +52,10 @@ export const createFileInDB = async (name: string, fileId: string, orgId: string
     });
 
     const response = await docClient.send(updateCommand);
-    console.log(response)
 }
 
 export const getFilesFromAWS = async (orgId: string, query?: string, favorites?: boolean, deletedOnly?: boolean, type?: string) => {
     const hasAccess = await hasAccessToOrg(orgId)
-
-    console.log("Is deletedOnly true: ", deletedOnly)
 
     if (!hasAccess) {
         return [];
@@ -111,7 +103,6 @@ export const getFilesFromAWS = async (orgId: string, query?: string, favorites?:
         files = files.filter(file => file.type === type)
     }
 
-    console.log("These are the files: ", files)
     return files;
 }
 

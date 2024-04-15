@@ -6,6 +6,7 @@ import { stripe } from "@/lib/stripe";
 
 import { currentUser } from "@clerk/nextjs";
 import { updateSubscription } from "@/actions/aws/users";
+import { retriveSubID } from "@/actions/stripe";
 
 export async function POST(req: Request) {
   let event: Stripe.Event;
@@ -53,9 +54,11 @@ export async function POST(req: Request) {
           break;
         case "payment_intent.succeeded":
           data = event.data.object as Stripe.PaymentIntent;
-          console.log(`💰 PaymentIntent status: ${data.status}`);
+          console.log(event)
+          // console.log(`💰 PaymentIntent status: ${data.status}`);
           console.log('This is the user: ', data.metadata.userId)
-          await updateSubscription(data.metadata.userId);
+          const subscription = await retriveSubID(data.customer as string)
+          await updateSubscription(subscription.user, subscription.customerId as string, "premium");
           break;
         default:
           throw new Error(`Unhandled event: ${event.type}`);

@@ -2,14 +2,16 @@
 
 import { Button } from "@/components/ui/button";
 import { OrganizationSwitcher, SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { Menu, SubscriptIcon, Wallet } from "lucide-react";
+import { Database, Menu, SubscriptIcon, Wallet } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import SubscriptionOverview from "./subscriptions/_components/subscriptionoverview";
+import StorageUsage from "./_components/clerk/storageusage";
 
 export function Header() {
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState<boolean>(false);
     return <div className="border-b py-4 bg-gray-50/75 w-screen backdrop-blur-lg z-50">
         <div className="items-center container mx-auto flex flex-col md:flex-row">
             <div className="flex w-full justify-between items-center">
@@ -57,6 +59,7 @@ export function Header() {
                 </SignedIn>
 
                 <div className="flex gap-4 ml-auto">
+                    {/* <CancelSubscriptionComponent isConfirmOpen={false} setIsConfirmOpen={setIsConfirmOpen} /> */}
                     <OrganizationSwitcher />
                         <UserButton 
                             afterSignOutUrl="/"
@@ -64,10 +67,17 @@ export function Header() {
                         >
                             <UserButton.UserProfilePage
                                 label="Subscription"
-                                labelIcon={<Wallet />}
+                                labelIcon={<Wallet className="w-4 h-4 justify-center items-center flex"/>}
                                 url="/dashboard/subscription"
                             >
                                 <SubscriptionOverview />
+                            </UserButton.UserProfilePage>
+                            <UserButton.UserProfilePage
+                                label="Usage"
+                                labelIcon={<Database className="w-4 h-4 justify-center items-center flex"/>}
+                                url="/dashboard/usage"
+                            >
+                                <StorageUsage />
                             </UserButton.UserProfilePage>
                         </UserButton>
                     <SignedOut>

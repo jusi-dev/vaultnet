@@ -39,14 +39,15 @@ export const updateUser = async (data: any) => {
     await docClient.send(updateCommand);
 }
 
-export const updateSubscription = async (userId: any) => {
+export const updateSubscription = async (userId: any, customerId: string, subscriptionType: string) => {
     const user = await getUserById(userId);
 
     const updateCommand = new PutCommand({
         TableName: 'vaultnet-users',
         Item: {
             ...user,
-            subscriptionType: "premium"
+            subscriptionType,
+            customerId,
         }
     });
 
@@ -139,8 +140,6 @@ export const getUser = async (data: any) => {
         throw new Error("User not found");
     }
 
-    console.log("This is the response: ", response.Item)
-
     return response.Item;
 }
 
@@ -153,8 +152,6 @@ export const getUserById = async (userId: any) => {
     });
 
     const response = await docClient.send(command);
-
-    console.log("This is the response: ", response.Item)
 
     if (!response.Item) {
         throw new Error("User not found");
@@ -208,23 +205,13 @@ export const updatedMbsUploaded = async (data: any) => {
 }
 
 const hasUserEnoughSpace = async (userData: any, currentFileSize: number) => {
-    if (userData.subscriptionType === "free" && userData.mbsUploaded <= 20000) {
-        if (userData.mbsUploaded + currentFileSize <= 20000) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    const subscriptionSize = await getSubscriptionStorage(userData.subscriptionType);
 
-    if (userData.subscriptionType === "premium" && userData.mbsUploaded <= 400000) {
-        if (userData.mbsUploaded + currentFileSize <= 400000) {
-            return true;
-        } else {
-            return false;
-        }
+    if (userData.mbsUploaded + currentFileSize <= subscriptionSize.size) {
+        return true;
+    } else {
+        return false;
     }
-
-    return true;
 }
 
 export const getUserId = async () => {
@@ -241,4 +228,29 @@ export const getMe = async () => {
     const userId = await getUserId();
 
     return await getUserById(userId);
+}
+
+export const getCurrentSubscription = async () => {
+    const userId = await getUserId();
+
+    const user = await getUserById(userId);
+
+    return user.subscriptionType;
+}
+
+export const getSubscriptionStorage = async (subscriptionType: string) => {
+    const command = new GetCommand({
+        TableName: 'vaultnet-subscriptions',
+        Key: {
+            subscriptionType
+        }
+    });
+
+    const response = await docClient.send(command);
+
+    if (!response.Item) {
+        throw new Error("User not found");
+    }
+
+    return response.Item;
 }
