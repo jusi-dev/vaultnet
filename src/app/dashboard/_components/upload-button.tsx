@@ -24,7 +24,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { fileTypes } from "../../../../convex/schema";
 import { Doc } from "../../../../convex/_generated/dataModel";
-import { createFileInDB } from "@/actions/aws/files";
+import { createFileInDB, createPresignedUploadUrl } from "@/actions/aws/files";
 
 const formSchema = z.object({
   title: z.string().min(1).max(200),
@@ -38,7 +38,6 @@ export function UploadButton() {
   const { toast } = useToast();
   const organization = useOrganization();
   const user = useUser();
-  const generateUploadUrl = useMutation(api.files.generateUploadUrl)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -74,8 +73,53 @@ export function UploadButton() {
     if(!orgId) return;
 
     const fileType = values.file[0].type;
+    const fileExtension = values.file[0].name.split('.').pop();
+    const fileName = values.file[0].name;
+    const fileSize = values.file[0].size;
 
-    const uploadResponseFileKey = await uploadToS3(values.file[0]);
+    const fileData = {
+      fileType,
+      fileExtension,
+      fileName,
+      fileSize,
+    }
+
+    const response = await createPresignedUploadUrl(orgId, fileData)
+    console.log("Presigned URL response: ", response)
+    
+    if ('error' in response) {
+      if(response.error === 909) {
+        return toast({
+          variant: "destructive",
+          title: "You have insufficent space left",
+          description: "Please delete some files to free up space or activate pay as you go.",
+        })
+      } else {
+        return toast({
+          variant: "destructive",
+          title: "Something went wrong",
+          description: "Your file could not be uploaded. Please try again later.",
+        })
+      }
+    }
+
+    const uploadResponseFileKey = response.fileKey;
+    const uploadURL = response.uploadUrl;
+
+    console.log("Presigned URL: ", uploadURL)
+    console.log("This is the client fileType: ", fileType)
+
+    const uploadResponse = await fetch(uploadURL, {
+      method: 'PUT',
+      body: values.file[0],
+      headers: {
+        'Content-Type': values.file[0].type as string,
+      }
+    })
+
+    console.log("Upload with presigned URL: ", uploadResponse)
+
+    // const uploadResponseFileKey = await uploadToS3(values.file[0]);
 
     const types = {
       "image/png": "image",
@@ -89,16 +133,9 @@ export function UploadButton() {
     console.log("Creating DB entry")
 
     try {
-      // await createFile({
-      //   name: values.title,
-      //   fileId: uploadResponseFileKey.fileKey,
-      //   orgId,
-      //   type: types[fileType],
-      // });
-
       await createFileInDB(
         values.title,
-        uploadResponseFileKey.fileKey,
+        uploadResponseFileKey,
         orgId,
         types[fileType],
       )
@@ -117,19 +154,11 @@ export function UploadButton() {
         description: "Your file has been uploaded successfully",
       })
     } catch (error) {
-      if(uploadResponseFileKey.error === 909) {
-        toast({
-          variant: "destructive",
-          title: "You have insufficent space left",
-          description: "Please delete some files to free up space or activate pay as you go.",
-        })
-      } else {
         toast({
           variant: "destructive",
           title: "Something went wrong",
           description: "Your file could not be uploaded. Please try again later.",
         })
-      }
     }
 
   }

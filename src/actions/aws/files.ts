@@ -3,7 +3,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { getUserById, getUserId, updatedMbsUploaded } from "./users";
 import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
-import { DeleteObjectCommand, HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 
 const dbClient = new DynamoDBClient({});
@@ -274,7 +275,7 @@ export const deleteFilePermanently = async (fileId: string) => {
 
     const headData = await s3Client.send(new HeadObjectCommand(deleteParams))
     const fileSize = headData.ContentLength
-    
+
     const fileData = {
         fileSize
     }
@@ -284,4 +285,46 @@ export const deleteFilePermanently = async (fileId: string) => {
     // Delete from S3
     const deleteData = await s3Client.send(new DeleteObjectCommand(deleteParams))
 
+}
+
+export const createPresignedUploadUrl = async (orgId: string, fileData: any) => {
+    const { fileSize, fileName, fileType, fileExtension } = fileData;
+
+    if (!fileData || !orgId) {
+        return { error: 'No file found', status: 400 };
+    }
+
+    const fileKey = `${fileName}_${orgId}_${Math.floor(Math.random() * 10000)}.${fileExtension}`;
+
+    const fileSizeData = {
+        fileSize
+    }
+
+    try {
+        await updatedMbsUploaded(fileSizeData, true)
+    } catch (error) {
+        return { error: 909, status: 500 };
+    }
+
+    try {
+        const command = new PutObjectCommand({
+            Bucket: "vaultnet",
+            Key: fileKey,
+            ContentType: fileType as string,
+        });
+        console.log("This is the server fileType: ", fileType)
+
+        const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
+        console.log("Upload URL: ", uploadUrl)
+
+        const responseData = {
+            fileKey,
+            uploadUrl,
+            status: 200
+        }
+
+        return responseData
+    } catch(err) {
+        return { error: 'File upload failed ' + err, status: 500 };
+    }
 }
