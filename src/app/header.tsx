@@ -2,10 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { OrganizationSwitcher, SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { Menu } from "lucide-react";
+import { Menu, SubscriptIcon, Wallet } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import SubscriptionOverview from "./subscriptions/_components/subscriptionoverview";
 
 export function Header() {
     const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -26,7 +27,7 @@ export function Header() {
 
             {isOpen &&
                 <div className="w-screen flex flex-col justify-center bg-gray-200 py-6 gap-y-8 mt-4">
-                    <Button variant={"outline"} className="mx-20">
+                    <Button variant={"orange"} className="mx-20">
                         <Link href="/dashboard/files">Your Files</Link>
                     </Button>
 
@@ -57,10 +58,18 @@ export function Header() {
 
                 <div className="flex gap-4 ml-auto">
                     <OrganizationSwitcher />
-                    <UserButton 
-                        afterSignOutUrl="/"
-                        // showName={true}
-                    />
+                        <UserButton 
+                            afterSignOutUrl="/"
+                            // showName={true}
+                        >
+                            <UserButton.UserProfilePage
+                                label="Subscription"
+                                labelIcon={<Wallet />}
+                                url="/dashboard/subscription"
+                            >
+                                <SubscriptionOverview />
+                            </UserButton.UserProfilePage>
+                        </UserButton>
                     <SignedOut>
                         <SignInButton
                             mode="modal"

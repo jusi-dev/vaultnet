@@ -31,24 +31,29 @@ export async function createCheckoutSession(
   
     const checkoutSession: Stripe.Checkout.Session =
       await stripe.checkout.sessions.create({
-        mode: "payment",
-        submit_type: "donate",
+        allow_promotion_codes: true,
+        billing_address_collection: "required",
+        mode: "subscription",
+        // submit_type: "pay",
         line_items: [
           {
             quantity: 1,
             price_data: {
               currency: CURRENCY,
               product_data: {
-                name: "Custom amount donation",
+                name: "VaultNet Subscription",
               },
               unit_amount: formatAmountForStripe(
                 Number(data.get("customDonation") as string),
                 CURRENCY,
               ),
+              recurring: {
+                interval: "month",
+              },
             },
           },
         ],
-        payment_intent_data: {
+        subscription_data: {
           metadata: {
             userId: await getUserId(),
           }
