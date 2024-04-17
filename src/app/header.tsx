@@ -29,16 +29,30 @@ export function Header() {
 
             {isOpen &&
                 <div className="w-screen flex flex-col justify-center bg-gray-200 py-6 gap-y-8 mt-4">
-                    <Button variant={"orange"} className="mx-20">
-                        <Link href="/dashboard/files">Your Files</Link>
-                    </Button>
-
-                    <div className="flex flex-col mx-auto gap-2">
+                    <div className="flex flex-col mx-auto gap-6 items-center justify-center">
+                        <Button variant={"orange"} className="mx-20">
+                            <Link href="/dashboard/files">Your Files</Link>
+                        </Button>
                         <OrganizationSwitcher />
                         <UserButton 
                             afterSignOutUrl="/"
                             showName={true}
-                        />
+                        >
+                            <UserButton.UserProfilePage
+                                label="Subscription"
+                                labelIcon={<Wallet className="w-4 h-4 justify-center items-center flex"/>}
+                                url="/dashboard/subscription"
+                            >
+                                <SubscriptionOverview />
+                            </UserButton.UserProfilePage>
+                            <UserButton.UserProfilePage
+                                label="Usage"
+                                labelIcon={<Database className="w-4 h-4 justify-center items-center flex"/>}
+                                url="/dashboard/usage"
+                            >
+                                <StorageUsage />
+                            </UserButton.UserProfilePage>
+                        </UserButton>
                         <SignedOut>
                             <SignInButton
                                 mode="modal"
