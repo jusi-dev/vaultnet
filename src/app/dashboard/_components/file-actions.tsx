@@ -71,7 +71,6 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
     useEffect(() => {
         (async () => {
             const user = await getMe();
-            console.log("File actions user: ", user);
             setMe(user);
         })();
     }, [])
@@ -93,8 +92,8 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                         window.dispatchEvent(new CustomEvent('fileUploaded'));
                         toast({
                             variant: "destructive",
-                            title: "File Deleted",
-                            description: "Your file will be deleted in 30 days.",
+                            title: "File moved to Trash",
+                            description: "Your file will be permanently deleted in 20 days.",
                         })
                     }}>Continue</AlertDialogAction>
                     </AlertDialogFooter>
@@ -144,8 +143,6 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                     </DropdownMenuItem>
                     <Protect
                         condition={(check) => {
-                            console.log("This is file.userId", file.userId)
-                            console.log("This is me.userId", me?.userId)
                             return check({
                                 role: "org:admin"
                             }) || file.userId === me?.userid
@@ -186,7 +183,7 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                             <DropdownMenuItem
                                 onClick={() => {
                                     if (file.shouldDelete) {
-                                        deleteFilePermanently(file.fileId);
+                                        deleteFilePermanently(file.fileId, '');
                                         window.dispatchEvent(new CustomEvent('fileUploaded'));
                                         toast({
                                             variant: "success",

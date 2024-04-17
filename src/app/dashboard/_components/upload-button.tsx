@@ -49,26 +49,25 @@ export function UploadButton() {
 
   const fileRef = form.register("file");
 
-  const uploadToS3 = async (file: File) => {
-    if (!orgId) {
-      return null;
-    }
+  // const uploadToS3 = async (file: File) => {
+  //   if (!orgId) {
+  //     return null;
+  //   }
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('fileName', "fileName.txt");
-    formData.append('orgId', orgId)
+  //   const formData = new FormData();
+  //   formData.append('file', file);
+  //   formData.append('fileName', "fileName.txt");
+  //   formData.append('orgId', orgId)
   
-    const response = await fetch('/api/uploadfile', {
-      method: 'POST',
-      body: formData, // Pass the formData object directly
-    });
+  //   const response = await fetch('/api/uploadfile', {
+  //     method: 'POST',
+  //     body: formData, // Pass the formData object directly
+  //   });
   
-    return response.json(); // Parse the JSON response
-  };
+  //   return response.json(); // Parse the JSON response
+  // };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
 
     if(!orgId) return;
 
@@ -85,7 +84,6 @@ export function UploadButton() {
     }
 
     const response = await createPresignedUploadUrl(orgId, fileData)
-    console.log("Presigned URL response: ", response)
     
     if ('error' in response) {
       if(response.error === 909) {
@@ -106,9 +104,6 @@ export function UploadButton() {
     const uploadResponseFileKey = response.fileKey;
     const uploadURL = response.uploadUrl;
 
-    console.log("Presigned URL: ", uploadURL)
-    console.log("This is the client fileType: ", fileType)
-
     const uploadResponse = await fetch(uploadURL, {
       method: 'PUT',
       body: values.file[0],
@@ -116,8 +111,6 @@ export function UploadButton() {
         'Content-Type': values.file[0].type as string,
       }
     })
-
-    console.log("Upload with presigned URL: ", uploadResponse)
 
     // const uploadResponseFileKey = await uploadToS3(values.file[0]);
 
@@ -130,8 +123,6 @@ export function UploadButton() {
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "word",
     } as Record<string, Doc<'files'>['type']>
 
-    console.log("Creating DB entry")
-
     try {
       await createFileInDB(
         values.title,
@@ -139,8 +130,6 @@ export function UploadButton() {
         orgId,
         types[fileType],
       )
-
-      console.log("DB entry created")
 
       form.reset();
 
@@ -166,7 +155,6 @@ export function UploadButton() {
   let orgId : string | undefined = undefined;
   if (organization.isLoaded && user.isLoaded) {
     orgId = organization.organization?.id ?? user.user?.id;
-    console.log('This is the browser user id: ', user.user?.id)
   }
 
   const [isFileDialogOpen, setIsFileDialogOpen] = useState(false);

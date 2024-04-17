@@ -1,7 +1,7 @@
 'use server';
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { getUserById, getUserId, updatedMbsUploaded } from "./users";
+import { getSubscriptionStorage, getUserById, getUserId, updatedMbsUploaded } from "./users";
 import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { DeleteObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -13,11 +13,18 @@ const docClient = DynamoDBDocumentClient.from(dbClient);
 const s3Client = new S3Client();
 
 
-async function hasAccessToOrg(orgId: string) {
-    const userId = await getUserId();
+async function hasAccessToOrg(orgId: string, isCron?: boolean) {
 
-    if (!userId) {
-        return null;
+    let userId;
+
+    if (!isCron) {
+        userId = await getUserId();
+
+        if (!userId) {
+            return null;
+        }
+    } else {
+        userId = orgId;
     }
 
     const user = await getUserById(userId);
@@ -25,6 +32,7 @@ async function hasAccessToOrg(orgId: string) {
     if (!user) {
         return null;
     }
+
     const hasAccess = user.orgIds?.some((item: any) => item.orgId === orgId) || user.userid.includes(orgId)
 
     if (!hasAccess) {
@@ -35,7 +43,7 @@ async function hasAccessToOrg(orgId: string) {
 }
 
 export const createFileInDB = async (name: string, fileId: string, orgId: string, type: string) => {
-    let date = new Date(Date.UTC(2024, 3, 11, 13, 22, 27));
+    let date = new Date();
     const hasAccess = await hasAccessToOrg(orgId)
 
     if (!hasAccess) {
@@ -58,8 +66,8 @@ export const createFileInDB = async (name: string, fileId: string, orgId: string
     const response = await docClient.send(updateCommand);
 }
 
-export const getFilesFromAWS = async (orgId: string, query?: string, favorites?: boolean, deletedOnly?: boolean, type?: string) => {
-    const hasAccess = await hasAccessToOrg(orgId)
+export const getFilesFromAWS = async (orgId: string, query?: string, favorites?: boolean, deletedOnly?: boolean, type?: string, isCron?: boolean) => {
+    const hasAccess = await hasAccessToOrg(orgId, isCron)
 
     if (!hasAccess) {
         return [];
@@ -213,12 +221,14 @@ export const deleteFile = async (fileId: string) => {
     const file = await getSingleFile(fileId);
 
     canDeleteFile(access.user, file);
+    const todaysDate = new Date();
 
     await docClient.send(new PutCommand({
         TableName: 'vaultnet-files',
         Item: {
             ...file,
-            shouldDelete: true
+            shouldDelete: true,
+            deleteDate: todaysDate.getTime()
         }
     }));
 }
@@ -243,16 +253,21 @@ export const restoreFile = async (fileId: string) => {
     }));
 }
 
-export const deleteFilePermanently = async (fileId: string) => {
-    const access = await hasAccessToFile(fileId);
-
-    if (!access) {
-        throw new Error("Not authorized");
-    }
-
+export const deleteFilePermanently = async (fileId: string, cronAuth: string) => {
     const file = await getSingleFile(fileId);
 
-    canDeleteFile(access.user, file);
+    if (cronAuth) {
+        if (cronAuth !== process.env.TRIGGER_API_KEY) {
+            throw new Error("Not authorized");
+        }
+    } else {
+        const access = await hasAccessToFile(fileId);
+
+        if (!access) {
+            throw new Error("Not authorized");
+        }
+        canDeleteFile(access.user, file);
+    }
 
     await docClient.send(new DeleteCommand({
         TableName: 'vaultnet-files',
@@ -280,11 +295,10 @@ export const deleteFilePermanently = async (fileId: string) => {
         fileSize
     }
 
-    await updatedMbsUploaded(fileData, false)
+    await updatedMbsUploaded(fileData, false, file?.userId)
 
     // Delete from S3
-    const deleteData = await s3Client.send(new DeleteObjectCommand(deleteParams))
-
+    await s3Client.send(new DeleteObjectCommand(deleteParams))
 }
 
 export const createPresignedUploadUrl = async (orgId: string, fileData: any) => {
@@ -300,8 +314,10 @@ export const createPresignedUploadUrl = async (orgId: string, fileData: any) => 
         fileSize
     }
 
+    const userId = await getUserId();
+
     try {
-        await updatedMbsUploaded(fileSizeData, true)
+        await updatedMbsUploaded(fileSizeData, true, userId)
     } catch (error) {
         return { error: 909, status: 500 };
     }
@@ -326,5 +342,48 @@ export const createPresignedUploadUrl = async (orgId: string, fileData: any) => 
         return responseData
     } catch(err) {
         return { error: 'File upload failed ' + err, status: 500 };
+    }
+}
+
+export const getFilesToDelete = async () => {
+    const scanCommand = new ScanCommand({
+        TableName: 'vaultnet-files',
+        FilterExpression: "shouldDelete = :shouldDelete",
+        ExpressionAttributeValues: {
+            ":shouldDelete": true,
+        }
+    });
+
+    const response = await docClient.send(scanCommand);
+
+    return response.Items;
+}
+
+export const freeUpSpaceWhenExceeded = async (userId: string, cronAuth: string) => {
+    let user = await getUserById(userId);
+
+    if (!user) {
+        return;
+    }
+
+    const userStorage = await getSubscriptionStorage(user.subscriptionType);
+
+    const todaysDate = new Date().getTime();
+    const subscriptionExpireDate = user.canceledSubscription;
+    const daysDifference = (todaysDate - subscriptionExpireDate) / (1000 * 3600 * 24);
+
+    if (daysDifference > 10) {
+        if (user.mbsUploaded > userStorage.size) {
+            const allFiles = await getFilesFromAWS(userId, undefined, undefined, false, '', true);
+            console.log("All files: ", allFiles)
+
+            while (user.mbsUploaded > userStorage.size && allFiles.length > 0) {
+                const biggestFile = allFiles.reduce((prev, current) => (prev.fileSize > current.fileSize) ? prev : current);
+        
+                await deleteFilePermanently(biggestFile.fileId, cronAuth);
+                user = await getUserById(userId);  // Update the user's uploaded MBs
+                allFiles.splice(allFiles.indexOf(biggestFile), 1);  // Remove the deleted file from the array
+            }
+        }
     }
 }

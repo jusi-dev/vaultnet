@@ -25,6 +25,7 @@ import { Doc } from "../../../../convex/_generated/dataModel";
 import { Label } from "@/components/ui/label";
 import { getAllFavorites, getFilesFromAWS } from "@/actions/aws/files";
 import { set } from "date-fns";
+import { getSessionStorage, setSessionStorage } from "@/hooks/useSessionStorage";
 
 
 function Placeholder() {
@@ -73,7 +74,6 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
         .then(favorites => {
           if (!favorites) return [];
           setFavorites(favorites);
-          console.log("These are the favorites: ", favorites)
         });
     }
   }
@@ -81,6 +81,7 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
   useEffect(() => {
     // Inital set loading
     setIsLoading(true);
+
     // Set up the event listener for file upload events
     window.addEventListener('fileUploaded', fetchFiles);
 

@@ -31,6 +31,9 @@
     "@stripe/react-stripe-js": "^2.7.0",
     "@stripe/stripe-js": "^3.2.0",
     "@tanstack/react-table": "^8.14.0",
+    "@trigger.dev/nextjs": "^2.3.18",
+    "@trigger.dev/react": "^2.3.18",
+    "@trigger.dev/sdk": "^2.3.18",
     "antd": "^5.15.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
@@ -47,10 +50,7 @@
     "svix": "^1.21.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.22.4",
-    "@trigger.dev/sdk": "^2.3.18",
-    "@trigger.dev/nextjs": "^2.3.18",
-    "@trigger.dev/react": "^2.3.18"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/formidable": "^3.4.5",

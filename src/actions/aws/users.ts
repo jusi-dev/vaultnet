@@ -1,8 +1,9 @@
 'use server';
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { PutCommand, DynamoDBDocumentClient, GetCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { currentUser } from "@clerk/nextjs";
+import { sub } from "date-fns";
 
 const dbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(dbClient);
@@ -39,7 +40,7 @@ export const updateUser = async (data: any) => {
     await docClient.send(updateCommand);
 }
 
-export const updateSubscription = async (userId: any, customerId: string, subscriptionType: string) => {
+export const updateSubscription = async (userId: any, customerId: string, subscriptionType: string, canceledSub?: boolean) => {
     const user = await getUserById(userId);
 
     const updateCommand = new PutCommand({
@@ -48,6 +49,7 @@ export const updateSubscription = async (userId: any, customerId: string, subscr
             ...user,
             subscriptionType,
             customerId,
+            canceledSubscription: canceledSub ? new Date().getTime() : "false"
         }
     });
 
@@ -181,9 +183,9 @@ export const isUserInOrg = async (data: any) => {
     return response.Item;
 }
 
-export const updatedMbsUploaded = async (data: any, addToUser: boolean) => {
+export const updatedMbsUploaded = async (data: any, addToUser: boolean, userId: string) => {
     const { fileSize } = data;
-    const currentUser = await getUserId();
+    const currentUser = userId;
 
     const userData = await getUserById(currentUser);
 
@@ -267,4 +269,45 @@ export const getSubscriptionStorage = async (subscriptionType: string) => {
     }
 
     return response.Item;
+}
+
+export const getAllUsers = async () => {
+    const command = new ScanCommand({
+        TableName: 'vaultnet-users'
+    });
+
+    const response = await docClient.send(command);
+
+    return response.Items;
+}
+
+export const getExceededStorageUsers = async () => {
+    const users = await getAllUsers();
+
+    if (!users) {
+        return [];
+    }
+
+    let exceededUsers: any[] = [];
+
+    for (const user of users) {
+        const subscriptionType = user?.subscriptionType?.S || ''; // Extract the string value from the 'AttributeValue' object
+        const subscriptionSize = await getSubscriptionStorage(subscriptionType);
+
+        if (!user.mbsUploaded?.N) {
+            user.mbsUploaded = { N: "0" };
+        }
+
+        if (user.mbsUploaded?.N > subscriptionSize.size) {
+            exceededUsers.push(user);
+        }
+    }
+
+    console.log("Exceeded users: ", exceededUsers)
+
+    return exceededUsers;
+}
+
+export const downgradeUser = async (userId: string) => {
+
 }

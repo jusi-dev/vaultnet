@@ -9,7 +9,7 @@ import { formatAmountForStripe } from '@/utils/stripe-helpers'
 import { stripe } from '@/lib/stripe'
 import { currentUser } from "@clerk/nextjs";
 import { getMe } from "../../convex/users";
-import { getSubscriptionStorage, updateSubscription } from "./aws/users";
+import { getSubscriptionStorage, getUserById, updateSubscription } from "./aws/users";
 
 const getUserId = async () => {
   const user = await currentUser();
@@ -89,10 +89,23 @@ export async function createCheckoutSession(
     return { user, subscriptionId, customerId }
   }
 
-  export const cancelSubscription = async (customerId: string) => {
+  export const changeSubscription = async (customerId: string, newSubscription: string) => {
     const subscription = await retriveSubID(customerId)
 
-    await updateSubscription(subscription.user, subscription.customerId as string, "free")
-    const status = await stripe.subscriptions.cancel(subscription.subscriptionId)
-    return status
+    const getNewSubscriptionStorage = await getSubscriptionStorage(newSubscription)
+    const user = await getUserById(subscription.user)
+
+    console.log("mbs uploaded: ", user.mbsUploaded)
+    console.log("new subscription size: ", getNewSubscriptionStorage.size)
+    console.log("Is bigger: ", user.mbsUploaded > getNewSubscriptionStorage.size)
+
+    // if (user.mbsUploaded > getNewSubscriptionStorage.size && !user.payAsYouGo) {
+    if (false) {
+      return { error: 'User has exceeded storage limit', subscriptionLimit: (getNewSubscriptionStorage.size / (1024 * 1024)).toFixed(2)}
+    } else {
+      await updateSubscription(subscription.user, subscription.customerId as string, newSubscription, true)
+      const status = await stripe.subscriptions.cancel(subscription.subscriptionId)
+      return {status}
+    }
+
   }

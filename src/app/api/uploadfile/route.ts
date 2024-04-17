@@ -27,7 +27,7 @@ export async function POST(req : Request, res: NextApiResponse){
     }
 
     try {
-      await updatedMbsUploaded(updateSizeData, true)
+      await updatedMbsUploaded(updateSizeData, true, orgId as string)
     } catch (error) {
       return new Response(JSON.stringify({error: 909}), { status: 500 });
     }
