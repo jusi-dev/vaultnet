@@ -16,7 +16,8 @@ export default function SubscriptionOverview() {
 
     const subscriptionType = {
         "premium": "Premium",
-        "free": "Free"
+        "free": "Free",
+        "alpha": "Pilot-User",
     } as any
 
     const payAsYouGo = {
@@ -64,8 +65,8 @@ export default function SubscriptionOverview() {
                         <div className="flex gap-4">
                             <div className="flex flex-col gap-2">
                                 <h2 className="text-xl font-bold">Current Plan</h2>
-                                <p className="text-gray-500">You are currently on the <span className="font-bold">{subscription}</span> plan</p>
-                                {subscription !== "Free" &&
+                                <p className="text-gray-500">You are currently on the <span className="font-bold">{subscription}</span> plan.</p>
+                                {subscription !== "Free" && subscription !== "Pilot-User" &&
                                     <div>
                                         <Button 
                                             disabled={isCancelling}

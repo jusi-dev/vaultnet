@@ -16,9 +16,11 @@ import {
   EmbeddedCheckoutProvider,
 } from "@stripe/react-stripe-js";
 import { currentUser } from "@clerk/nextjs";
+import { sub } from "date-fns";
 
 interface CheckoutFormProps {
   uiMode: Stripe.Checkout.SessionCreateParams.UiMode;
+  subscriptionType: string;
 }
 
 export default function CheckoutForm(props: CheckoutFormProps): JSX.Element {
@@ -31,7 +33,8 @@ export default function CheckoutForm(props: CheckoutFormProps): JSX.Element {
     const uiMode = data.get(
       "uiMode",
     ) as Stripe.Checkout.SessionCreateParams.UiMode;
-    const { client_secret, url } = await createCheckoutSession(data, "premium");
+    const subscriptionType = props.subscriptionType;
+    const { client_secret, url } = await createCheckoutSession(data, subscriptionType);
 
     if (uiMode === "embedded") return setClientSecret(client_secret);
 

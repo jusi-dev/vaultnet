@@ -21,9 +21,7 @@ const getUserId = async () => {
   return user.id;
 }
 
-export async function createCheckoutSession(
-    data: FormData, subscriptionType: string
-  ): Promise<{ client_secret: string | null; url: string | null }> {
+export async function createCheckoutSession( data: FormData, subscriptionType: string ) : Promise<{ client_secret: string | null; url: string | null }> {
     const ui_mode = data.get(
       "uiMode",
     ) as Stripe.Checkout.SessionCreateParams.UiMode;

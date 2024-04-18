@@ -308,6 +308,12 @@ export const getExceededStorageUsers = async () => {
     return exceededUsers;
 }
 
-export const downgradeUser = async (userId: string) => {
+export const getAllSubscriptions = async () => {
+    const command = new ScanCommand({
+        TableName: 'vaultnet-subscriptions'
+    });
 
+    const response = await docClient.send(command);
+
+    return response.Items;
 }

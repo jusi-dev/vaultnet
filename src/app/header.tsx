@@ -20,6 +20,10 @@ export function Header() {
                     VaultNet
                 </Link>
 
+                <Link href={"/subscriptions"} className="flex items-center text-gray-600 gap-2 font-semibold underline underline-offset-2 text-lg cursor-pointer hover:text-orange-500">
+                    Subscriptions
+                </Link>
+
                 <div className="flex md:hidden ml-auto">
                     <div>
                         <Menu onClick={() => setIsOpen(!isOpen)}/>

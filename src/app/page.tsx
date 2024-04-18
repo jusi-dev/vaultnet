@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/accordion"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Metadata } from "next";
+import SubscriptionCardFree from "./subscriptions/_components/subscriptioncardfree";
+import SubscriptionCard from "./subscriptions/_components/subscriptioncard";
 
 export const metadata: Metadata = {
   title: "VaultNet - Secure Swiss Storage",
@@ -28,8 +30,8 @@ export default function Home() {
         {/* Hero Section */}
         <div className="flex items-center py-10 w-screen mx-auto z-20">
           <div className="flex flex-col items-center w-full overflow-x-hidden md:h-screen md:mt-16 gap-y-10 mx-6 md:mx-10 lg:mx-0">
-            <div className="bg-white rounded-full p-10 drop-shadow-xl">
-              <Image src="/logo-faultnet.png" width={0} height={0} sizes="100vw" alt="VaultNet" style={{ width: '100%', height: 'auto' }}/>
+            <div className="bg-white rounded-full p-10 drop-shadow-xl w-[17vw]">
+              <Image src="/logo-faultnet.png" width={0} height={0} alt="VaultNet" sizes="100%" style={{ width: '100%', height: 'auto' }}/>
             </div>
             <div className="flex flex-col gap-y-6">
               <h1 className="text-4xl lg:text-7xl text-gray-800 font-extrabold text-center">Swiss Precision for Your Data: <br /> <span className="text-2xl lg:text-5xl">Secure, Private, and as Solid as the Alps.</span></h1>
@@ -149,52 +151,13 @@ export default function Home() {
             <div>
               <div className="p-2 bg-lime-500 items-center rounded-3xl w-80 mx-auto"> <p className="text-center text-gray-50 text-xs md:text-md">🌷 Spring Sale - CHF 10 OFF 🌷</p></div>
               <h2 className="text-3xl md:text-5xl text-gray-800 text-center mt-10 font-extrabold">Start storing your files <br/>within Switzerland</h2>
-              <p className="mt-2 md:mt-8 text-center text-gray-500 text-lg md:text-xl font-medium">Store your files, share your files and manage your files.<br/>Get started today! </p>
+              <p className="mt-2 md:mt-8 text-center text-gray-500 text-lg md:text-xl font-medium">The most flexible pricing system which you will ever encouter. <br/>Don't pay ever again for storage which you don't need. </p>
             </div>
-            <div className="flex flex-col md:flex-row mt-10 md:mt-20 w-full gap-20">
+            <div className="flex flex-col md:flex-row mt-10 md:mt-20 w-full gap-8">
 
-              <div className="flex flex-col md:w-[30vw] bg-white p-12 rounded-lg">
-                <div className="flex flex-wrap items-center gap-y-1">
-                  <p className="font-normal line-through text-gray-500 text-xl">CHF 15</p>
-                  <p className="text-4xl font-bold ml-3">CHF 5</p>
-                  <p className="text-xl text-gray-500 md:ml-3 md:mt-2">per month</p>
-                </div>
-                <div className="flex flex-col w-full mt-10">
-                  <ul className="md:font-semibold">
-                    <li className="flex"><Check className="flex-shrink-0"/> 100GB of Storage</li>
-                    <li className="flex"><Check className="flex-shrink-0"/> Add up to 5 members in an organization</li>
-                    <li className="flex"><Check className="flex-shrink-0"/> + CHF 1.50 per additional 10 GB </li>
-                  </ul>
-                </div>
-                <div className="mt-10">
-                  <Button variant="orange" className="text-2xl w-full" size={"landing"}>Choose Now</Button>
-                  <p className="text-center font-extralight mt-1">Recurring monthly costs</p>
-                </div>
-              </div>
-
-              <div className="flex flex-col md:w-[30vw] bg-white p-12 rounded-lg border-2 border-orange-500">
-                <div className="flex w-full justify-center">
-                  <div className="p-1 bg-orange-500 items-center rounded-3xl w-80 -mt-16 absolute">
-                    <p className="text-center text-gray-50">TOP CHOICE</p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-y-1">
-                  <p className="font-normal line-through text-gray-500 text-xl">CHF 20</p>
-                  <p className="text-4xl font-bold ml-3">CHF 10</p>
-                  <p className="text-xl text-gray-500 md:ml-3 md:mt-2">per month</p>
-                </div>
-                <div className="flex flex-col w-full mt-10">
-                  <ul className="md:font-semibold">
-                    <li className="flex"><Check className="flex-shrink-0"/> 250GB of Storage</li>
-                    <li className="flex"><Check className="flex-shrink-0"/> Unlimited members in a single organization</li>
-                    <li className="flex"><Check className="flex-shrink-0"/> + CHF 1 per additional 10 GB </li>
-                  </ul>
-                </div>
-                <div className="mt-10">
-                  <Button variant="orange" className="text-2xl w-full" size={"landing"}>Choose Now</Button>
-                  <p className="text-center font-extralight mt-1">Recurring monthly costs</p>
-                </div>
-              </div>
+            <SubscriptionCardFree />
+            <SubscriptionCard subscription="Vault L" price={1500} topChoice={true} shortDesc="Most popular choice for KMUs"/>
+            <SubscriptionCard subscription="Vault S" price={1000} topChoice={false} shortDesc="The perfect solution for individuals" />
 
             </div>
           </div>
