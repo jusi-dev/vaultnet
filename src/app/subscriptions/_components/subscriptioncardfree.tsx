@@ -12,14 +12,14 @@ export default function SubscriptionCardFree() {
                 </div>
                 <div className="flex flex-wrap items-center gap-y-1">
                     <p className="text-3xl font-bold ml-3">Free</p>
-                    <p className="text-xl text-gray-500 md:ml-3 md:mt-2">forever</p>
+                    <p className="text-xl text-gray-500 ml-3 mt-2">forever</p>
                 </div>
             </div>
             <div className="flex flex-col w-full mt-10">
                 <ul className="md:font-semibold">
-                <li className="flex"><Check className="flex-shrink-0"/> 250GB of Storage</li>
-                <li className="flex"><Check className="flex-shrink-0"/> Unlimited members in a single organization</li>
-                <li className="flex"><Check className="flex-shrink-0"/> + CHF 1 per additional 10 GB </li>
+                <li className="flex"><Check className="flex-shrink-0"/> 50MB of Storage</li>
+                <li className="flex"><Check className="flex-shrink-0"/> Up to 5 members in a single organization</li>
+                <li className="flex"><Check className="flex-shrink-0"/> + CHF 2 per additional 10 GB </li>
                 </ul>
             </div>
             <div className="mt-10">

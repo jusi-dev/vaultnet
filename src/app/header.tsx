@@ -20,10 +20,6 @@ export function Header() {
                     VaultNet
                 </Link>
 
-                <Link href={"/subscriptions"} className="flex items-center text-gray-600 gap-2 font-semibold underline underline-offset-2 text-lg cursor-pointer hover:text-orange-500">
-                    Subscriptions
-                </Link>
-
                 <div className="flex md:hidden ml-auto">
                     <div>
                         <Menu onClick={() => setIsOpen(!isOpen)}/>
@@ -32,8 +28,11 @@ export function Header() {
             </div>
 
             {isOpen &&
-                <div className="w-screen flex flex-col justify-center bg-gray-200 py-6 gap-y-8 mt-4">
+                <div className="w-screen flex flex-col justify-center bg-gray-100 py-6 gap-y-8 mt-4">
                     <div className="flex flex-col mx-auto gap-6 items-center justify-center">
+                        <Link href={"/subscriptions"} className="flex items-center text-gray-600 gap-2 font-semibold underline underline-offset-2 text-lg cursor-pointer hover:text-orange-500">
+                            Subscriptions
+                        </Link>
                         <Button variant={"orange"} className="mx-20">
                             <Link href="/dashboard/files">Your Files</Link>
                         </Button>
@@ -70,6 +69,9 @@ export function Header() {
             }
 
             <div className="hidden md:flex gap-x-4 justify-center items-center">
+                <Link href={"/subscriptions"} className="flex items-center text-gray-600 gap-2 font-semibold underline underline-offset-2 text-lg cursor-pointer hover:text-orange-500">
+                    Subscriptions
+                </Link>
                 <SignedIn>
                     <Button variant={"outline"} className="ml-10">
                         <Link href="/dashboard/files">Your Files</Link>

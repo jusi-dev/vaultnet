@@ -2,13 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import CheckoutForm from "./checkoutform";
 
-export default function SubscriptionCard({ subscription, price, shortDesc, topChoice } : { subscription: string, price: number, shortDesc: string, topChoice?: boolean}) {
+export default function SubscriptionCard({ subscription, price, shortDesc, topChoice, subPerks } : { subscription: string, price: number, shortDesc: string, topChoice?: boolean, subPerks?: any}) {
+
+    const { storageSize, members, additionalStoragePrice } = subPerks;
 
     return(
         <div className="flex flex-col md:w-[30vw] bg-white p-12 rounded-lg border-2 border-orange-500 mt-10 drop-shadow-lg">
             {topChoice &&
                 <div className="flex w-full justify-center">
-                    <div className="p-1 bg-orange-500 items-center rounded-3xl w-80 -mt-16 absolute">
+                    <div className="p-1 bg-orange-500 items-center rounded-3xl w-60 md:w-80 -mt-16 absolute">
                     <p className="text-center text-gray-50">TOP CHOICE</p>
                     </div>
                 </div>
@@ -26,9 +28,9 @@ export default function SubscriptionCard({ subscription, price, shortDesc, topCh
             </div>
             <div className="flex flex-col w-full mt-10">
                 <ul className="md:font-semibold">
-                <li className="flex"><Check className="flex-shrink-0"/> 250GB of Storage</li>
-                <li className="flex"><Check className="flex-shrink-0"/> Unlimited members in a single organization</li>
-                <li className="flex"><Check className="flex-shrink-0"/> + CHF 1 per additional 10 GB </li>
+                <li className="flex"><Check className="flex-shrink-0"/> {storageSize}GB of Storage</li>
+                <li className="flex"><Check className="flex-shrink-0"/> {members} members in a single organization</li>
+                <li className="flex"><Check className="flex-shrink-0"/> + CHF {additionalStoragePrice.toFixed(2)} per additional 10 GB </li>
                 </ul>
             </div>
             <div className="mt-10">
