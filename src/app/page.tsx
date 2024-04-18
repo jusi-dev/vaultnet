@@ -48,8 +48,9 @@ export default function Home() {
                 </span>
               </h1>
               <p className="text-xl text-gray-500 text-center lg:text-2xl">
-                Start storing your files securely in Switzerland, within a
-                minute.
+                {/* Start storing your files securely in Switzerland, within a
+                minute. */}
+                Don't pay ever again for storage which you don't need!<br />Flexible, dynamic and extremely easy.
               </p>
             </div>
             <div className="flex md:flex-row flex-col md:gap-10 gap-6">
@@ -69,6 +70,7 @@ export default function Home() {
           <p className="text-4xl text-center md:text-6xl text-gray-800 font-extrabold">
             Want to store your files securely?
           </p>
+          <p className="text-center text-gray-600 text-2xl mt-4">Compare why we are the top choice for you</p>
         </div>
         <div className="flex flex-col md:flex-row gap-8 md:gap-24 mt-12 md:mt-28">
           <div className="bg-red-100 flex flex-col text-red-700 rounded-lg p-8 md:p-12 w-full md:w-[30vw]">
@@ -151,20 +153,24 @@ export default function Home() {
             </div>
             <div>
               <p className="md:text-2xl text-gray-700 text-center">
-                This is the easiest and best way to solve my storage problem! I
+                {/* This is the easiest and best way to solve my storage problem! I
                 don't even have to worry about the security of my files. So glad
-                that there is a provider inside of Switzerland!
+                that there is a provider inside of Switzerland! */}
+
+                I never liked the complexity or pricing models of other providers. 
+                But with VaultNet I can easily manage my files and share them with my team members. 
+                The best thing is the hybird pricing model. I only pay for what I use.
               </p>
             </div>
             <div className="flex flex-row gap-4 items-center">
-              <Avatar className="w-14 h-14 md:w-20 md:h-20 ">
-                <AvatarImage src="/avatar.jpg" />
-              </Avatar>
+              <div
+                className="w-14 h-14 md:w-20 md:h-20 bg-gray-400 rounded-full bg-[url('/jusi.jpg')] bg-cover bg-center"
+              ></div>
               <div className="flex flex-col">
                 <p className="text-lg md:text-xl text-gray-800 font-semibold">
-                  John Doe
+                  Justin Winistörfer
                 </p>
-                <p className="md:text-lg text-gray-600">CEO of Company X</p>
+                <p className="md:text-lg text-gray-600">Owner of Winistörfer Webdesign</p>
               </div>
             </div>
           </div>
@@ -177,6 +183,7 @@ export default function Home() {
           <h2 className="text-3xl md:text-5xl text-gray-800 text-left font-extrabold">
             The #1 Swiss Storage Service
           </h2>
+          <p className="text-left text-gray-600 text-2xl mt-4">It was never easier to manage all your files in the cloud</p>
           <div className="mt-6 md:mt-24 flex flex-col md:flex-row">
             <Accordion type="single" collapsible className="md:w-[30vw]">
               <AccordionItem value="item-1">
@@ -213,6 +220,35 @@ export default function Home() {
               <AspectRatio ratio={16 / 9} className="">
                 <div className="bg-gray-400">PlaceHolder Image</div>
               </AspectRatio>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container flex flex-col items-center w-full mt-32 md:mt-60">
+        <div className="w-full">
+          <h2 className="text-5xl md:text-5xl text-gray-800 text-center font-extrabold">
+            So many reasons <br/>to choose VaultNet
+          </h2>
+          <p className="text-center text-gray-600 text-2xl mt-4">And there are still many more to explore!</p>
+          <div className="text-center flex flex-col md:flex-row items-center justify-center mt-24 gap-20">
+            <div className="h-20">
+              <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Up to</p>
+              <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">99.999999999%</p>
+              <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">durability</p>
+              <p>No joke! blablabla</p>
+            </div>
+            <div className="h-20">
+              <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">All files are stored</p>
+              <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">within Switzerland</p>
+              <p className="text-lg text-white font-semibold">.</p>
+              <p>No joke! blablabla</p>
+            </div>
+            <div className="h-20">
+              <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Save money with the</p>
+              <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">Pay-As-You-Go</p>
+              <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">hybrid pricing model.</p>
+              <p>No joke! blablabla</p>
             </div>
           </div>
         </div>
@@ -406,11 +442,14 @@ export default function Home() {
       </div>
 
       <div className="container">
-        <div className="flex flex-col mt-52 pb-40 md:mx-20">
-          <h2 className="text-4xl md:text-6xl text-gray-800 text-center mt-10 font-extrabold">
-            Never be worried about your Data ever again. <br />
-            Start using Vaultnet
+        <div className="flex flex-col mt-40 pb-40 md:mx-[20%] items-center">
+          <h2 className="text-4xl md:text-5xl text-gray-700 text-center mt-10 font-extrabold">
+            It was never easier to store your files so flexible and secure!<br/>
           </h2>
+          <p className="mt-12 text-4xl md:text-5xl text-orange-500 text-center font-extrabold">Onboard on VaultNet in less than a minute.</p>
+          <Button variant="orange" className="text-2xl mt-14 w-[50%] md:w-[30%]" size={"landing"}>
+            Get Started
+          </Button>
         </div>
       </div>
 
