@@ -16,15 +16,17 @@ import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Metadata } from "next";
 import SubscriptionCardFree from "./subscriptions/_components/subscriptioncardfree";
 import SubscriptionCard from "./subscriptions/_components/subscriptioncard";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "VaultNet - Secure Swiss Storage",
+  description: "VaultNet is the most secure and flexible storage solution in Switzerland. Store your files securely and privately in the heart of the Swiss Alps.",
 };
 
 
 export default function Home() {
   return (
-    <main className="w-screen m-0 p-0 flex flex-col overflow-x-hidden">
+    <main className="w-screen m-0 p-0 flex flex-col overflow-x-hidden scroll-smooth">
       <div className="mx-auto w-screen flex flex-col items-center relative">
         <BackgroundDrop />
         {/* Hero Section */}
@@ -54,18 +56,22 @@ export default function Home() {
               </p>
             </div>
             <div className="flex md:flex-row flex-col md:gap-10 gap-6">
-              <Button variant="orange" className="text-2xl" size={"landing"}>
-                Get Started
-              </Button>
-              <Button variant="outline" className="text-2xl" size={"landing"}>
-                Learn More <ArrowRight />
-              </Button>
+              <Link href="https://accounts.vaultnet.ch/sign-up">
+                <Button variant="orange" className="text-2xl" size={"landing"}>
+                  Get Started
+                </Button>
+              </Link>
+              <Link href={"#learnMore"}>
+                <Button variant="outline" className="text-2xl" size={"landing"}>
+                  Learn More <ArrowRight />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container flex flex-col items-center w-full mt-20 md:mt-44">
+      <div className="container flex flex-col items-center w-full mt-20 md:mt-44 scroll-mt-20" id="learnMore">
         <div>
           <p className="text-4xl text-center md:text-6xl text-gray-800 font-extrabold">
             Want to store your files securely?
@@ -447,9 +453,11 @@ export default function Home() {
             It was never easier to store your files so flexible and secure!<br/>
           </h2>
           <p className="mt-12 text-4xl md:text-5xl text-orange-500 text-center font-extrabold">Onboard on VaultNet in less than a minute.</p>
-          <Button variant="orange" className="text-2xl mt-14 w-[50%] md:w-[30%]" size={"landing"}>
-            Get Started
-          </Button>
+          <Link href="https://accounts.vaultnet.ch/sign-up" className="text-2xl mt-14 w-[50%] md:w-[30%]">
+            <Button variant="orange" className="" size={"landing"}>
+              Get Started
+            </Button>
+          </Link>
         </div>
       </div>
 
