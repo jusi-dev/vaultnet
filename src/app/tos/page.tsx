@@ -2,6 +2,7 @@ export default function TermsOfService() {
     return(
         <div className="container">
             <h2 className="text-gray-700 mt-10 text-5xl">Terms Of Service</h2>
+            <p className="mt-6">Effective Date: 19.04.2024</p>
 
             <h3 className="text-gray-700 text-3xl mt-6">1. Introduction</h3>
             <p className="mt-4">Welcome to VaultNet! These Terms of Service ("TOS") govern your use of the VaultNet service, a digital storage solution provided by Winistörfer Webdesign ("Company", "we", "us", or "our"), accessible through various platforms and devices. By creating an account or using VaultNet, you agree to be bound by these TOS and our Privacy Policy.</p>

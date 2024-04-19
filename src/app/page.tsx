@@ -232,23 +232,23 @@ export default function Home() {
           </h2>
           <p className="text-center text-gray-600 text-2xl mt-4">And there are still many more to explore!</p>
           <div className="text-center flex flex-col md:flex-row items-center justify-center mt-12 md:mt-24 gap-20 gap-y-12">
-            <div className="md:h-20">
+            <div className="flex flex-col items-center md:w-[30%]">
               <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Up to</p>
               <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">99.999999999%</p>
               <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">durability</p>
-              <p>No joke! blablabla</p>
+              <p className="mt-2 text-center">Unlock Unparalleled Endurance — Experience our 9-Nine Durability Standard that promises virtually perfect persistence, ensuring your data withstands the test of time with unwavering resilience.</p>
             </div>
-            <div className="md:h-20">
+            <div className="flex flex-col items-center md:w-[33%]">
               <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">All files are stored</p>
               <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">within Switzerland</p>
               <p className="text-lg text-white font-semibold">.</p>
-              <p>No joke! blablabla</p>
+              <p className="mt-2 text-center">Swiss Sanctuary for Data — Benefit from the robust privacy laws and meticulous attention to detail with our exclusive Swiss storage solutions. Your data is not just stored; it’s fortified in the heart of Switzerland.</p>
             </div>
-            <div className="md:h-20">
+            <div className="flex flex-col items-center md:w-[30%]">
               <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Save money with the</p>
               <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">Pay-As-You-Go</p>
               <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">hybrid pricing model.</p>
-              <p>No joke! blablabla</p>
+              <p className="mt-2 text-center">Economize Without Compromise — Embrace our Hybrid Pay-As-You-Go Model for a tailor-made pricing strategy that adapts to your usage. Spend less, save more, and enjoy the elasticity that your finances will thank you for.</p>
             </div>
           </div>
         </div>
