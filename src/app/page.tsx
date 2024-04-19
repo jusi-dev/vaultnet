@@ -200,7 +200,7 @@ export default function Home() {
                   <p className="text-left mb-4">Create easily within a minute your account, and connect it
                   with other providers.</p>
 
-                  <div className="flex w-[80%]">
+                  <div className="flex">
                     <AspectRatio ratio={16 / 9} className="flex w-full">
                       <Image src={"/vaultnet-create.gif"} alt="Create Account" layout="fill" objectFit="cover" />
                     </AspectRatio>
@@ -212,9 +212,16 @@ export default function Home() {
                 <AccordionTrigger className="text-xl md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
                   2. Upload your first file
                 </AccordionTrigger>
-                <AccordionContent className="text-lg md:text-xl text-gray-600">
-                  Create easily within a minute your account, and connect it
-                  with other providers.
+                <AccordionContent className="text-lg md:text-xl text-gray-600 flex flex-col">
+                  <p className="text-left mb-4">Create easily within a minute your account, and connect it
+                  with other providers.</p>
+
+                  <div className="flex">
+                    <AspectRatio ratio={16 / 9} className="flex w-full">
+                      <Image src={"/vaultnet-upload.gif"} alt="Create Account" layout="fill" objectFit="cover" />
+                    </AspectRatio>
+                  </div>
+                  
                 </AccordionContent>
               </AccordionItem>
 
@@ -222,9 +229,16 @@ export default function Home() {
                 <AccordionTrigger className="text-xl md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
                   3. Share files with your organization or friends!
                 </AccordionTrigger>
-                <AccordionContent className="text-lg md:text-xl text-gray-600">
-                  Create an organization and invite your team members or
-                  friends! Share files with them easily.
+                <AccordionContent className="text-lg md:text-xl text-gray-600 flex flex-col">
+                  <p className="text-left mb-4">Create an organization and invite your team members or
+                  friends! Share files with them easily.</p>
+
+                  <div className="flex">
+                    <AspectRatio ratio={16 / 9} className="flex w-full">
+                      <Image src={"/vaultnet-share.gif"} alt="Create Account" layout="fill" objectFit="cover" />
+                    </AspectRatio>
+                  </div>
+                  
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
