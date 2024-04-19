@@ -341,7 +341,7 @@ export default function Home() {
 
           {/* FAQ */}
 
-          <div className="w-full flex flex-col md:flex-row mt-36 md:mt-52 pb-40 md:justify-between">
+          <div className="w-full flex flex-col md:flex-row mt-36 md:mt-52 pb-40 md:justify-between scroll-mt-20" id="faq">
             <div>
               <h2 className="text-4xl md:text-5xl text-gray-800 text-left font-extrabold">
                 FAQ

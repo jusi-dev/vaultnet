@@ -23,7 +23,7 @@ export default function SubscriptionCardFree() {
                 </ul>
             </div>
             <div className="mt-10">
-                <Button variant="orange" className="text-2xl w-full" size={"landing"}>Choose Now</Button>
+                <Button variant="orange" className="text-2xl w-full hover:cursor-not-allowed" size={"landing"}>Currently not available</Button>
                 <p className="text-center font-extralight mt-1">Recurring monthly costs</p>
             </div>
         </div>

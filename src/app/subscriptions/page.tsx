@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 
 export default function DonatePage(): JSX.Element {
   return (
-    <div className="container flex flex-col w-full items-center justify-center mx-auto">
-      <h1 className="text-3xl md:text-5xl text-gray-800 text-center mt-10 font-extrabold">
+    <div className="container flex flex-col w-full items-center justify-center mx-auto my-20">
+      <h1 className="text-3xl md:text-5xl text-gray-800 text-center font-extrabold">
         Choose your VaultNet subscription
       </h1>
       <p className="text-center text-gray-500 mt-2">

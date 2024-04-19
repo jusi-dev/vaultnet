@@ -4,6 +4,7 @@ export default authMiddleware({
     publicRoutes: [
       "/", 
       "/subscriptions/(.*)",
+      "/subscriptions",
       "/api/checkoutwebhook", 
       "/share/(.*)", 
       "/api/clerkhook", 
