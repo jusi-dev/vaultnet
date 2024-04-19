@@ -231,20 +231,20 @@ export default function Home() {
             So many reasons <br/>to choose VaultNet
           </h2>
           <p className="text-center text-gray-600 text-2xl mt-4">And there are still many more to explore!</p>
-          <div className="text-center flex flex-col md:flex-row items-center justify-center mt-24 gap-20">
-            <div className="h-20">
+          <div className="text-center flex flex-col md:flex-row items-center justify-center mt-12 md:mt-24 gap-20 gap-y-12">
+            <div className="md:h-20">
               <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Up to</p>
               <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">99.999999999%</p>
               <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">durability</p>
               <p>No joke! blablabla</p>
             </div>
-            <div className="h-20">
+            <div className="md:h-20">
               <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">All files are stored</p>
               <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">within Switzerland</p>
               <p className="text-lg text-white font-semibold">.</p>
               <p>No joke! blablabla</p>
             </div>
-            <div className="h-20">
+            <div className="md:h-20">
               <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Save money with the</p>
               <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">Pay-As-You-Go</p>
               <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">hybrid pricing model.</p>

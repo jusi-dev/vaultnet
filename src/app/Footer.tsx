@@ -22,9 +22,9 @@ export function Footer() {
             <div className="flex flex-col">
                 <p className="font-semibold text-xl mb-4">Company</p>
                 <Link className="cursor-pointer" href="/about">About Us</Link>
-                <Link className="cursor-pointer" href="/terms">Terms of Service</Link>
+                <Link className="cursor-pointer" href="/tos">Terms of Service</Link>
                 <Link className="cursor-pointer" href="/privacy">Privacy Policy</Link>
-                <Link href="/terms" className="cursor-pointer">Imprint</Link>
+                <Link href="/imprint" className="cursor-pointer">Imprint</Link>
             </div>
             <div className="flex flex-col">
                 <p className="font-semibold text-xl mb-4">Get in touch</p>
