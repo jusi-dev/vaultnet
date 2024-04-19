@@ -21,6 +21,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "VaultNet - Secure Swiss Storage",
   description: "VaultNet is the most secure and flexible storage solution in Switzerland. Store your files securely and privately in the heart of the Swiss Alps.",
+  keywords: "vaultnet, storage, switzerland, secure, private, flexible, cheap, easy",
 };
 
 
@@ -57,12 +58,12 @@ export default function Home() {
             </div>
             <div className="flex md:flex-row flex-col md:gap-10 gap-6">
               <Link href="https://accounts.vaultnet.ch/sign-up">
-                <Button variant="orange" className="text-2xl" size={"landing"}>
+                <Button variant="orange" className="text-2xl w-[100%]" size={"landing"}>
                   Get Started
                 </Button>
               </Link>
               <Link href={"#learnMore"}>
-                <Button variant="outline" className="text-2xl" size={"landing"}>
+                <Button variant="outline" className="text-2xl w-[100%]" size={"landing"}>
                   Learn More <ArrowRight />
                 </Button>
               </Link>
@@ -170,7 +171,7 @@ export default function Home() {
             </div>
             <div className="flex flex-row gap-4 items-center">
               <div
-                className="w-14 h-14 md:w-20 md:h-20 bg-gray-400 rounded-full bg-[url('/jusi.jpg')] bg-cover bg-center"
+                className="w-12 h-12 md:w-20 md:h-20 bg-gray-400 rounded-full bg-[url('/jusi.jpg')] bg-cover bg-center"
               ></div>
               <div className="flex flex-col">
                 <p className="text-lg md:text-xl text-gray-800 font-semibold">
@@ -197,7 +198,7 @@ export default function Home() {
                   1. Create an Account
                 </AccordionTrigger>
                 <AccordionContent className="text-lg md:text-xl text-gray-600 flex flex-col">
-                  <p className="text-left mb-4">Create easily within a minute your account, and connect it
+                  <p className="text-left mb-4">Create easily within a minute your account, or connect VaultNet
                   with other providers.</p>
 
                   <div className="flex">
@@ -213,8 +214,7 @@ export default function Home() {
                   2. Upload your first file
                 </AccordionTrigger>
                 <AccordionContent className="text-lg md:text-xl text-gray-600 flex flex-col">
-                  <p className="text-left mb-4">Create easily within a minute your account, and connect it
-                  with other providers.</p>
+                  <p className="text-left mb-4">Just click on "Upload File" and choose your file. It's really that easy!</p>
 
                   <div className="flex">
                     <AspectRatio ratio={16 / 9} className="flex w-full">
@@ -227,11 +227,10 @@ export default function Home() {
 
               <AccordionItem value="item-3">
                 <AccordionTrigger className="text-xl md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
-                  3. Share files with your organization or friends!
+                  3. Share files with your family, friends or team members!
                 </AccordionTrigger>
                 <AccordionContent className="text-lg md:text-xl text-gray-600 flex flex-col">
-                  <p className="text-left mb-4">Create an organization and invite your team members or
-                  friends! Share files with them easily.</p>
+                  <p className="text-left mb-4">The most convinient way to share files with everyone! Just create a shareable link and copy it.</p>
 
                   <div className="flex">
                     <AspectRatio ratio={16 / 9} className="flex w-full">
@@ -282,27 +281,27 @@ export default function Home() {
       </div>
 
       {/* Pricing Section */}
-      <div className="w-full mt-16 md:mt-52 bg-gray-100">
-        <div className="container flex flex-col items-center mt-32 w-full">
+      <div className=" mt-16 md:mt-52 bg-gray-100">
+        <div className=" container flex flex-col items-center mt-32">
           <div>
             <div>
               <div className="p-2 bg-lime-500 items-center rounded-3xl w-80 mx-auto">
                 {" "}
                 <p className="text-center text-gray-50 text-xs md:text-md">
-                  🌷 Spring Sale - CHF 10 OFF 🌷
+                  🌷 Spring Sale - 50% OFF 🌷
                 </p>
               </div>
               <h2 className="text-3xl md:text-5xl text-gray-800 text-center mt-10 font-extrabold">
                 Start storing your files <br />
                 within Switzerland
               </h2>
-              <p className="mt-2 md:mt-8 text-center text-gray-500 text-lg md:text-xl font-medium">
+              <p className="mt-2 md:mt-8 text-center mx-auto text-gray-500 text-lg md:text-xl font-medium w-[80%]">
                 The most flexible pricing system which you will ever encouter.{" "}
                 <br />
                 Don't pay ever again for storage which you don't need.{" "}
               </p>
             </div>
-            <div className="flex container flex-col md:flex-row mt-10 md:mt-20 w-full gap-8">
+            <div className="flex container flex-col md:flex-row mt-10 md:mt-20 w-[90%] md:w-full gap-8">
               <SubscriptionCardFree />
               <SubscriptionCard
                 subscription="Vault L"
