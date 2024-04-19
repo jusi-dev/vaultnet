@@ -191,14 +191,20 @@ export default function Home() {
           </h2>
           <p className="text-left text-gray-600 text-2xl mt-4">It was never easier to manage all your files in the cloud</p>
           <div className="mt-6 md:mt-24 flex flex-col md:flex-row">
-            <Accordion type="single" collapsible className="md:w-[30vw]">
+            <Accordion type="single" collapsible className="md:w-[80vw]">
               <AccordionItem value="item-1">
                 <AccordionTrigger className="text-xl md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
                   1. Create an Account
                 </AccordionTrigger>
-                <AccordionContent className="text-lg md:text-xl text-gray-600">
-                  Create easily within a minute your account, and connect it
-                  with other providers.
+                <AccordionContent className="text-lg md:text-xl text-gray-600 flex flex-col">
+                  <p className="text-left mb-4">Create easily within a minute your account, and connect it
+                  with other providers.</p>
+
+                  <div className="flex w-[80%]">
+                    <AspectRatio ratio={16 / 9} className="flex w-full">
+                      <Image src={"/vaultnet-create.gif"} alt="Create Account" layout="fill" objectFit="cover" />
+                    </AspectRatio>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
 
@@ -222,11 +228,12 @@ export default function Home() {
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-            <div>
-              <AspectRatio ratio={16 / 9} className="">
-                <div className="bg-gray-400">PlaceHolder Image</div>
+
+            {/* <div className="flex w-[80%]">
+              <AspectRatio ratio={16 / 9} className="flex w-full">
+                <Image src={"/vaultnet-create.gif"} alt="Create Account" layout="fill" objectFit="cover" />
               </AspectRatio>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
