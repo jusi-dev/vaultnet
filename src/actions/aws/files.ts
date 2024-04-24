@@ -387,3 +387,75 @@ export const freeUpSpaceWhenExceeded = async (userId: string, cronAuth: string) 
         }
     }
 }
+
+export const addTagToFile = async (fileId: string, tag: string, color: string) => {
+    
+    const access = await hasAccessToFile(fileId);
+
+    if (!access) {
+        throw new Error("Not authorized");
+    }
+
+    const file = await getSingleFile(fileId);
+
+    if (!file) {
+        throw new Error("File not found");
+    }
+
+    const tags = file.tags || [];
+
+    tags.push({
+        color,
+        tag
+    });
+
+    await docClient.send(new PutCommand({
+        TableName: 'vaultnet-files',
+        Item: {
+            ...file,
+            tags
+        }
+    }));
+}
+
+export const removeTagFromFile = async (fileId: string, tag: string) => {
+    const access = await hasAccessToFile(fileId);
+
+    if (!access) {
+        throw new Error("Not authorized");
+    }
+
+    const file = await getSingleFile(fileId);
+
+    if (!file) {
+        throw new Error("File not found");
+    }
+
+    const tags = file.tags || [];
+
+    const newTags = tags.filter((t: { tag: string }) => t.tag !== tag);
+
+    await docClient.send(new PutCommand({
+        TableName: 'vaultnet-files',
+        Item: {
+            ...file,
+            tags: newTags
+        }
+    }));
+}
+
+export const getFileTags = async (fileId: string) => {
+    const access = await hasAccessToFile(fileId);
+
+    if (!access) {
+        throw new Error("Not authorized");
+    }
+
+    const file = await getSingleFile(fileId);
+
+    if (!file) {
+        throw new Error("File not found");
+    }
+
+    return file.tags;
+}

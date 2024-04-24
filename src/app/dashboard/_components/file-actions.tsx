@@ -3,7 +3,11 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuPortal,
     DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
 
@@ -19,7 +23,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
   
-import { DownloadIcon, MoreVertical, Share2Icon, ShareIcon, StarHalf, StarIcon, Trash2Icon, UndoIcon } from "lucide-react";
+import { DownloadIcon, MoreVertical, Share2Icon, ShareIcon, StarHalf, StarIcon, TagIcon, Trash2Icon, UndoIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -28,6 +32,7 @@ import { Protect } from "@clerk/nextjs";
 import { ShareButton } from "./share-button";
 import { deleteFile, deleteFilePermanently, restoreFile, toggleFavorite } from "@/actions/aws/files";
 import { getMe } from "@/actions/aws/users";
+import TagManager from "./tag-manager";
 
 export function useFileUrlGenerator () {
     const getFileUrl = async (fileId: Id<"_storage"> | string, shareTime: number) => {
@@ -123,6 +128,18 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                         )}
                         
                     </DropdownMenuItem>
+                    <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                            <div className="flex gap-1 items-center">
+                                <TagIcon className="w-4 h-4"/> Manage Tags
+                            </div>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                        <DropdownMenuSubContent>
+                            <TagManager file={file}/>
+                        </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                    </DropdownMenuSub>
                     <DropdownMenuItem
                         onClick={() => {
                             window.open( downloadUrl, "_blank")
