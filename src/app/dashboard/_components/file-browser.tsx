@@ -26,6 +26,7 @@ import { Label } from "@/components/ui/label";
 import { getAllFavorites, getFilesFromAWS } from "@/actions/aws/files";
 import { set } from "date-fns";
 import { getSessionStorage, setSessionStorage } from "@/hooks/useSessionStorage";
+import { TagFilter } from "./tag-filter";
 
 
 function Placeholder() {
@@ -55,13 +56,21 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
   const [isLoading, setIsLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [type, setType] = useState("all");
+  const [filterTag, setFilterTag] = useState("all");
 
   let orgId = organization.isLoaded && user.isLoaded ? (organization.organization?.id ?? user.user?.id) : undefined;
 
   const fetchFiles = () => {
     if (orgId) {
-      getFilesFromAWS(orgId, query, filterFavorites, deletedOnly, type === "all" ? undefined : type)
-        .then(fetchedFiles => {
+      getFilesFromAWS({ 
+        orgId, 
+        query, 
+        filterFavorites, 
+        deletedOnly, 
+        type: type === "all" ? undefined : type,
+        filterTag: filterTag === "all" ? undefined : filterTag,
+      })
+        .then((fetchedFiles) => {
           setFiles(fetchedFiles as File[]);
           setIsLoading(false);
         });
@@ -93,7 +102,7 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
     return () => {
         window.removeEventListener('fileUploaded', fetchFiles);
     };
-  }, [orgId, query, filterFavorites, deletedOnly, type]);
+  }, [orgId, query, filterFavorites, deletedOnly, type, filterTag]);
 
   const modifiedFiles = files.map(file => ({
     ...file,
@@ -139,6 +148,7 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
                   </SelectContent>
                 </Select>
               </div>
+              <TagFilter filterTag={filterTag} setFilterTag={setFilterTag}/>
             </div>
 
             {isLoading && (

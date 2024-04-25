@@ -66,7 +66,10 @@ export const createFileInDB = async (name: string, fileId: string, orgId: string
     const response = await docClient.send(updateCommand);
 }
 
-export const getFilesFromAWS = async (orgId: string, query?: string, favorites?: boolean, deletedOnly?: boolean, type?: string, isCron?: boolean) => {
+export const getFilesFromAWS = async (data: any) => {
+    // orgId: string, query?: string, favorites?: boolean, deletedOnly?: boolean, type?: string, isCron?: boolean
+
+    const { orgId, query, favorites, deletedOnly, type, isCron, filterTag } = data;
     const hasAccess = await hasAccessToOrg(orgId, isCron)
 
     if (!hasAccess) {
@@ -113,6 +116,10 @@ export const getFilesFromAWS = async (orgId: string, query?: string, favorites?:
 
     if (type) {
         files = files.filter(file => file.type === type)
+    }
+
+    if (filterTag) {
+        files = files.filter(file => file.tags?.some((tag: { tag: string }) => tag.tag === filterTag))
     }
 
     return files;
@@ -374,7 +381,14 @@ export const freeUpSpaceWhenExceeded = async (userId: string, cronAuth: string) 
 
     if (daysDifference > 10) {
         if (user.mbsUploaded > userStorage.size) {
-            const allFiles = await getFilesFromAWS(userId, undefined, undefined, false, '', true);
+            const allFiles = await getFilesFromAWS({
+                orgId: userId, 
+                query: undefined, 
+                favorites: undefined, 
+                deletedOnly: false, 
+                type: '', 
+                isCron: true
+            });
             console.log("All files: ", allFiles)
 
             while (user.mbsUploaded > userStorage.size && allFiles.length > 0) {

@@ -18,6 +18,12 @@ import { api } from "../../../../convex/_generated/api";
 import { FileCardActions, useFileUrlGenerator } from "./file-actions";
 import { getUserById } from "@/actions/aws/users";
 
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+  } from "@/components/ui/hover-card"
+
 interface User {
     name: string;
     image: string;
@@ -61,11 +67,25 @@ export function FileCard({ file }: {file: any & {isFavorited: boolean}}) {
 
     return (
         <Card>
-            <CardHeader className="relative">
+            <CardHeader className="relative flex">
                 <CardTitle className="flex gap-2 text-gray-700 font-normal">
                     <div className="flex justify-center">{typeIcons[file.type as keyof typeof typeIcons]}</div>
                     {file.name}
                 </CardTitle>
+
+                <div className="flex gap-0.5">
+                {file.tags?.map((tag: any) => (
+                       <HoverCard key={tag}>
+                        <HoverCardTrigger>
+                            <div className="w-4 h-4 rounded-full" style={{backgroundColor: tag.color}}></div>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="m-0 p-2 w-auto">
+                          {tag.tag}
+                        </HoverCardContent>
+                      </HoverCard>
+                    ))}
+                </div>
+
                 <div className="absolute top-2 right-2">
                     <FileCardActions isFavorited={file.isFavorited} file={file} downloadUrl={fileUrl}/>
                 </div>
@@ -84,16 +104,18 @@ export function FileCard({ file }: {file: any & {isFavorited: boolean}}) {
             {file.type === "csv" && <GanttChartIcon className="w-20 h-20"/>}
             {file.type === "pdf" && <FileTextIcon className="w-20 h-20"/>}
             </CardContent>
-            <CardFooter className="flex justify-between">
-                <div className="flex gap-2 text-xs text-gray-700 w-40 items-center">
-                    <Avatar className="w-6 h-6">
-                        <AvatarImage src={(userProfile as User)?.image} />
-                        <AvatarFallback>CN</AvatarFallback>
-                    </Avatar>
-                    {(userProfile as User)?.name ?? "Unknown User"}
-                </div>
-                <div className="text-xs text-gray-700">
-                    Uploaded on {formatRelative(new Date(file._creationTime), new Date())}
+            <CardFooter className="flex flex-col justify-between">
+                <div className="flex">
+                    <div className="flex gap-2 text-xs text-gray-700 w-40 items-center">
+                        <Avatar className="w-6 h-6">
+                            <AvatarImage src={(userProfile as User)?.image} />
+                            <AvatarFallback>CN</AvatarFallback>
+                        </Avatar>
+                        {(userProfile as User)?.name ?? "Unknown User"}
+                    </div>
+                    <div className="text-xs text-gray-700">
+                        Uploaded on {formatRelative(new Date(file._creationTime), new Date())}
+                    </div>
                 </div>
             </CardFooter>
         </Card>

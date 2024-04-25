@@ -25,14 +25,13 @@ import {
   
 import { DownloadIcon, MoreVertical, Share2Icon, ShareIcon, StarHalf, StarIcon, TagIcon, Trash2Icon, UndoIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
 import { useToast } from "@/components/ui/use-toast";
 import { Protect } from "@clerk/nextjs";
 import { ShareButton } from "./share-button";
 import { deleteFile, deleteFilePermanently, restoreFile, toggleFavorite } from "@/actions/aws/files";
 import { getMe } from "@/actions/aws/users";
 import TagManager from "./tag-manager";
+import { TagCreator } from "./tag-creator";
 
 export function useFileUrlGenerator () {
     const getFileUrl = async (fileId: Id<"_storage"> | string, shareTime: number) => {
@@ -66,11 +65,9 @@ export function useFileUrlGenerator () {
 export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorited: boolean ,file: Doc<"files">, downloadUrl: string }) {
     const { toast } = useToast();
 
-    // const toggleFavorite = useMutation(api.files.toggleFavorite);
-    // const deleteFile = useMutation(api.files.deleteFile);
-    // const restoreFile = useMutation(api.files.restoreFile);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
+    const [isTagOpen, setIsTagOpen] = useState(false);
     const [me, setMe] = useState<any>(null);
 
     useEffect(() => {
@@ -82,6 +79,8 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
 
     return (
         <>
+            <TagCreator isTagOpen={isTagOpen} setIsTagOpen={setIsTagOpen} file={file}/>
+
             <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen} >
                 <AlertDialogContent>
                     <AlertDialogHeader>
@@ -136,7 +135,7 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                         </DropdownMenuSubTrigger>
                         <DropdownMenuPortal>
                         <DropdownMenuSubContent>
-                            <TagManager file={file}/>
+                            <TagManager file={file} setIsTagOpen={setIsTagOpen}/>
                         </DropdownMenuSubContent>
                         </DropdownMenuPortal>
                     </DropdownMenuSub>
