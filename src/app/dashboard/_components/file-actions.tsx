@@ -23,7 +23,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
   
-import { DownloadIcon, MoreVertical, Share2Icon, ShareIcon, StarHalf, StarIcon, TagIcon, Trash2Icon, UndoIcon } from "lucide-react";
+import { DownloadIcon, Eye, MoreVertical, Share2Icon, ShareIcon, StarHalf, StarIcon, TagIcon, Trash2Icon, UndoIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Protect } from "@clerk/nextjs";
@@ -32,6 +32,7 @@ import { deleteFile, deleteFilePermanently, restoreFile, toggleFavorite } from "
 import { getMe } from "@/actions/aws/users";
 import TagManager from "./tag-manager";
 import { TagCreator } from "./tag-creator";
+import { FilePreviewer } from "./file-previewer";
 
 export function useFileUrlGenerator () {
     const getFileUrl = async (fileId: Id<"_storage"> | string, shareTime: number) => {
@@ -68,6 +69,7 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [isTagOpen, setIsTagOpen] = useState(false);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [me, setMe] = useState<any>(null);
 
     useEffect(() => {
@@ -106,6 +108,8 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
 
             <ShareButton isShareOpen={isShareOpen} setIsShareOpen={setIsShareOpen} fileId={file.fileId}/>
 
+            <FilePreviewer isPreviewOpen={isPreviewOpen} setIsPreviewOpen={setIsPreviewOpen} file={file} fileUrl={downloadUrl}/>
+
             <DropdownMenu>
                 <DropdownMenuTrigger><MoreVertical /></DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -126,6 +130,16 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                             </div>
                         )}
                         
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        onClick={() => {
+                            setIsPreviewOpen(true)
+                        }} 
+                        className="flex gap-1 items-center cursor-pointer"
+                    >
+                        <div className="flex gap-1 items-center">
+                            <Eye className="w-4 h-4"/> Preview
+                        </div>
                     </DropdownMenuItem>
                     <DropdownMenuSub>
                         <DropdownMenuSubTrigger>

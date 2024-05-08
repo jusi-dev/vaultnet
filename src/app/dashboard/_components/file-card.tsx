@@ -18,6 +18,8 @@ import { api } from "../../../../convex/_generated/api";
 import { FileCardActions, useFileUrlGenerator } from "./file-actions";
 import { getUserById } from "@/actions/aws/users";
 
+import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
+
 import {
     HoverCard,
     HoverCardContent,
@@ -80,7 +82,7 @@ export function FileCard({ file }: {file: any & {isFavorited: boolean}}) {
                             <div className="w-4 h-4 rounded-full" style={{backgroundColor: tag.color}}></div>
                         </HoverCardTrigger>
                         <HoverCardContent className="m-0 p-2 w-auto">
-                          {tag.tag}
+                          {tag.tag.charAt(0).toUpperCase() + tag.tag.slice(1)}
                         </HoverCardContent>
                       </HoverCard>
                     ))}
@@ -102,7 +104,36 @@ export function FileCard({ file }: {file: any & {isFavorited: boolean}}) {
             )}
 
             {file.type === "csv" && <GanttChartIcon className="w-20 h-20"/>}
-            {file.type === "pdf" && <FileTextIcon className="w-20 h-20"/>}
+            {file.type === "pdf" && 
+                <DocViewer
+                    prefetchMethod="GET"
+                    documents={[{ uri: fileUrl }]} 
+                    pluginRenderers={DocViewerRenderers}
+                    style={{ width: "100%", height: "100%", overflow: "hidden" }}
+                    config={{
+                        header: {
+                            disableHeader: true,
+                            disableFileName: true,
+                        },
+                    
+                    }}
+                />
+            }
+            {file.type === "word" && 
+                <DocViewer
+                    prefetchMethod="GET"
+                    documents={[{ uri: fileUrl }]} 
+                    pluginRenderers={DocViewerRenderers}
+                    style={{ width: "100%", height: "100%" }}
+                    config={{
+                        header: {
+                            disableHeader: true,
+                            disableFileName: true,
+                        },
+                    
+                    }}
+                />
+            }
             </CardContent>
             <CardFooter className="flex flex-col justify-between">
                 <div className="flex">

@@ -119,7 +119,12 @@ export const getFilesFromAWS = async (data: any) => {
     }
 
     if (filterTag) {
-        files = files.filter(file => file.tags?.some((tag: { tag: string }) => tag.tag === filterTag))
+        filterTag.map((arrayTag: string) => {
+            arrayTag.toLowerCase()
+            files = files?.filter(file => file.tags?.some((fileTag: { tag: string }) => fileTag.tag === arrayTag));
+        });
+        // Map through the array and filter only the files that have the value
+        // files = files.filter(file => file.tags?.some((fileTag: { tag: string }) => fileTag.tag === filterTag));
     }
 
     return files;

@@ -56,7 +56,7 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
   const [isLoading, setIsLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [type, setType] = useState("all");
-  const [filterTag, setFilterTag] = useState("all");
+  const [filterTag, setFilterTag] = useState(["all"] as string[]);
 
   let orgId = organization.isLoaded && user.isLoaded ? (organization.organization?.id ?? user.user?.id) : undefined;
 
@@ -68,7 +68,7 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
         filterFavorites, 
         deletedOnly, 
         type: type === "all" ? undefined : type,
-        filterTag: filterTag === "all" ? undefined : filterTag,
+        filterTag: filterTag.includes("all") ? undefined : filterTag,
       })
         .then((fetchedFiles) => {
           setFiles(fetchedFiles as File[]);
