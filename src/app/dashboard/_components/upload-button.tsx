@@ -104,15 +104,25 @@ export function UploadButton(orgOrUser: any) {
     const uploadResponseFileKey = response.fileKey;
     const uploadURL = response.uploadUrl;
 
+    let headers;
+
+    if (encryptionKey) {
+      headers = {
+        'Content-Type': values.file[0].type as string,
+        'x-amz-server-side-encryption-customer-algorithm': 'AES256',
+        'x-amz-server-side-encryption-customer-key': encryptionKey,
+        'x-amz-server-side-encryption-customer-key-MD5': encryptionKeyMD5,
+      }
+    } else {
+      headers = {
+        'Content-Type': values.file[0].type as string,
+      }
+    }
+
     const uploadResponse = await fetch(uploadURL, {
       method: 'PUT',
       body: values.file[0],
-      headers: {
-        'Content-Type': values.file[0].type as string,
-        'x-amz-server-side-encryption-customer-algorithm': encryptionKey && 'AES256',
-        'x-amz-server-side-encryption-customer-key': encryptionKey && encryptionKey,
-        'x-amz-server-side-encryption-customer-key-MD5': encryptionKeyMD5 && encryptionKeyMD5,
-      }
+      headers,
     })
 
     // const uploadResponseFileKey = await uploadToS3(values.file[0]);
