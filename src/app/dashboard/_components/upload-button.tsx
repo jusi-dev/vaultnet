@@ -25,16 +25,17 @@ import { Loader2 } from "lucide-react";
 import { fileTypes } from "../../../../convex/schema";
 import { Doc } from "../../../../convex/_generated/dataModel";
 import { createFileInDB, createPresignedUploadUrl } from "@/actions/aws/files";
+import { unstable_renderSubtreeIntoContainer } from "react-dom";
 
 const formSchema = z.object({
-  title: z.string().min(1).max(200),
+  title: z.string().min(0).max(200),
   file: z
     .custom<FileList>((val) => val instanceof FileList, "Required")
     .refine((files) => files.length > 0, "Required"),
 })
 
 
-export function UploadButton() {
+export function UploadButton(orgOrUser: any) {
   const { toast } = useToast();
   const organization = useOrganization();
   const user = useUser();
@@ -49,25 +50,24 @@ export function UploadButton() {
 
   const fileRef = form.register("file");
 
-  // const uploadToS3 = async (file: File) => {
-  //   if (!orgId) {
-  //     return null;
-  //   }
-
-  //   const formData = new FormData();
-  //   formData.append('file', file);
-  //   formData.append('fileName', "fileName.txt");
-  //   formData.append('orgId', orgId)
-  
-  //   const response = await fetch('/api/uploadfile', {
-  //     method: 'POST',
-  //     body: formData, // Pass the formData object directly
-  //   });
-  
-  //   return response.json(); // Parse the JSON response
-  // };
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    let encryptionKey;
+    let encryptionKeyMD5;
+
+    if (!orgOrUser.orgOrUser.id) {
+      console.log("Haut doch NID dr Latz")
+        encryptionKey = orgOrUser!.publicMetadata?.encryptionKeyBase64 as string;
+        encryptionKeyMD5 = orgOrUser!.publicMetadata?.encryptionKeyMD5Base64 as string;
+    } else {
+        console.log("Haut doch dr Latz")
+        encryptionKey = orgOrUser!.orgOrUser?.publicMetadata?.encryptionKeyBase64 as string;
+        encryptionKeyMD5 = orgOrUser!.orgOrUser?.publicMetadata?.encryptionKeyMD5Base64 as string;
+    }
+
+    console.log("This is the userOrgObject of upload-button: ", orgOrUser);
+    console.log("This is the org id: ", orgOrUser.orgOrUser.id);
+
+    console.log("This is the encryption key from upload-button: ", encryptionKey);
 
     if(!orgId) return;
 
@@ -83,7 +83,7 @@ export function UploadButton() {
       fileSize,
     }
 
-    const response = await createPresignedUploadUrl(orgId, fileData)
+    const response = await createPresignedUploadUrl(orgId, fileData, encryptionKey, encryptionKeyMD5)
     
     if ('error' in response) {
       if(response.error === 909) {
@@ -109,6 +109,9 @@ export function UploadButton() {
       body: values.file[0],
       headers: {
         'Content-Type': values.file[0].type as string,
+        'x-amz-server-side-encryption-customer-algorithm': encryptionKey && 'AES256',
+        'x-amz-server-side-encryption-customer-key': encryptionKey && encryptionKey,
+        'x-amz-server-side-encryption-customer-key-MD5': encryptionKeyMD5 && encryptionKeyMD5,
       }
     })
 
@@ -125,10 +128,12 @@ export function UploadButton() {
 
     try {
       await createFileInDB(
-        values.title,
+        values.title ? values.title : values.file[0].name,
         uploadResponseFileKey,
         orgId,
         types[fileType],
+        fileSize,
+        encryptionKey ? true : false,
       )
 
       form.reset();
@@ -159,8 +164,6 @@ export function UploadButton() {
 
   const [isFileDialogOpen, setIsFileDialogOpen] = useState(false);
 
-  const createFile = useMutation(api.files.createFile);
-
   return (
     <Dialog open={isFileDialogOpen} onOpenChange={(isOpen) => {
         setIsFileDialogOpen(isOpen);
@@ -182,9 +185,9 @@ export function UploadButton() {
                         name="title"
                         render={({ field}) => (
                         <FormItem>
-                            <FormLabel>Title:</FormLabel>
+                            <FormLabel>Title (optional):</FormLabel>
                             <FormControl>
-                            <Input placeholder="hello world" {...field} />
+                              <Input placeholder="hello world" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -198,9 +201,9 @@ export function UploadButton() {
                         <FormItem>
                             <FormLabel>Choose a File:</FormLabel>
                             <FormControl>
-                            <Input 
-                                type="file"  {...fileRef}
-                            />
+                              <Input 
+                                  type="file"  {...fileRef}
+                              />
                             </FormControl>
                             <FormMessage />
                         </FormItem>

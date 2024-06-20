@@ -1,0 +1,30 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { getLink } from "./aws-actions";
+import { getShareLink } from "@/actions/aws/files";
+
+export default function ShareComponent ({params} : any) {
+    const [link, setLink] = useState<string>("");
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    const getSharedLink = async () => {
+        try {
+            const { targetLink } = await getShareLink(params.slug);
+            setLink(targetLink);
+            setIsLoading(false);
+        } catch (err) {
+            console.error("Error querying the database:", err);
+        }
+    }
+
+    useEffect(() => {
+        getSharedLink()
+    })
+
+    return (
+        <div>
+            {isLoading ? "Loading..." : link}
+        </div>
+    )
+}

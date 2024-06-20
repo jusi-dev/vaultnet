@@ -34,8 +34,8 @@ export default function SubscriptionCard({ subscription, price, shortDesc, topCh
                 </ul>
             </div>
             <div className="mt-10">
-            {/* <CheckoutForm uiMode="hosted" subscriptionType="premium"/> */}
-                <Button variant="orange" className="text-2xl w-full hover:cursor-not-allowed" size={"landing"}>Currently not available</Button>
+                <CheckoutForm uiMode="hosted" subscriptionType={subscription}/>
+                {/* <Button variant="orange" className="text-2xl w-full hover:cursor-not-allowed" size={"landing"}>Currently not available</Button> */}
                 <p className="text-center font-extralight mt-1">Recurring monthly costs</p>
             </div>
         </div>

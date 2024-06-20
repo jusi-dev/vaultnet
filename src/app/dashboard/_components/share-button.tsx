@@ -20,19 +20,18 @@ import { z } from "zod"
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
-import { useFileUrlGenerator } from "./file-actions";
 import { CopyToClipboard } from "./clipboard";
+import { createShareLink } from "@/actions/aws/files";
 
 const formSchema = z.object({
   days: z.string().min(1).max(1),
 })
 
-export function ShareButton({ isShareOpen, setIsShareOpen, fileId }: { isShareOpen: boolean, setIsShareOpen: any, fileId: string}) {
+export function ShareButton({ isShareOpen, setIsShareOpen, fileId, orgOrUser }: { isShareOpen: boolean, setIsShareOpen: any, fileId: string, orgOrUser: any}) {
   const { toast } = useToast();
   const organization = useOrganization();
   const user = useUser();
 
-  const getFileUrl = useFileUrlGenerator();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,7 +44,28 @@ export function ShareButton({ isShareOpen, setIsShareOpen, fileId }: { isShareOp
     if (!orgId) {
       return null;
     }
-    const shareUrl = await getFileUrl(fileId, shareTime);
+
+    let encryptionKey;
+    let encryptionKeyMD5;
+
+    console.log("Test Output")
+
+    if (!orgOrUser?.id) {
+        encryptionKey = orgOrUser!.publicMetadata?.encryptionKeyBase64 as string;
+        encryptionKeyMD5 = orgOrUser!.publicMetadata?.encryptionKeyMD5Base64 as string;
+    } else {
+        encryptionKey = orgOrUser?.publicMetadata?.encryptionKeyBase64 as string;
+        encryptionKeyMD5 = orgOrUser?.publicMetadata?.encryptionKeyMD5Base64 as string;
+    }
+
+    console.log("Creating share link")
+    console.log("This is the orgOrUser: ", orgOrUser)
+    const shareUrl = await createShareLink(fileId, shareTime, encryptionKey, encryptionKeyMD5);
+
+    console.log("Share URL: ", shareUrl)
+
+
+    // const shareUrl = await getFileUrl(fileId, shareTime);
 
     const formData = new FormData();
     await formData.append('targetLink', shareUrl as string);
@@ -62,15 +82,13 @@ export function ShareButton({ isShareOpen, setIsShareOpen, fileId }: { isShareOp
     if (!orgId) return;
 
     try {
-        const daysInSeconds = parseInt(values.days) * 24 * 60 * 60;
+        const daysInSeconds = parseInt(form.getValues("days")) * 24 * 60 * 60;
         const shareUrlId = await createShareUrl(daysInSeconds);
-
-        form.reset();
+        console.log("Share URL ID: ", shareUrlId)
+        
 
         setIsShared(true);
         setShareUrl(shareUrlId || '');
-
-        //   setIsShareOpen(false);
 
         toast({
             variant: "success",
@@ -81,7 +99,7 @@ export function ShareButton({ isShareOpen, setIsShareOpen, fileId }: { isShareOp
       toast({
         variant: "destructive",
         title: "Something went wrong",
-        description: "Your file could not be uploaded. Please try again later.",
+        description: `Your file could not be shared. Please try again later. ${error}`,
       });
     }
   }
@@ -111,9 +129,11 @@ export function ShareButton({ isShareOpen, setIsShareOpen, fileId }: { isShareOp
                             name="days"
                             render={({ field}) => (
                             <FormItem>
-                                <FormLabel>How many days do you want to share your file: {form.getValues("days")} Days.</FormLabel>
+                                <FormLabel>How many days do you want to share your file: {form.getValues("days")} Days. <br/>
+                                  <span className="text-xs italic text-red-400">Your file will be decrypted and may be publicly accessible.</span>
+                                </FormLabel>
                                     <FormControl>
-                                        <Input type="range" min={"1"} max={"7"} {...field} />
+                                        <Input type="range" min={"1"} max={"7"} {...field}/>
                                     </FormControl>
                                 <FormMessage />
                             </FormItem>

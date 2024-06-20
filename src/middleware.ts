@@ -8,7 +8,11 @@ export default authMiddleware({
       "/api/checkoutwebhook", 
       "/share/(.*)", 
       "/api/clerkhook", 
-      "/api/trigger"
+      "/api/trigger",
+      "/imprint",
+      "/privacy",
+      "/tos",
+      "/about",
     ],
 });
  

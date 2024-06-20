@@ -1,6 +1,6 @@
 "use client"
 
-import { useOrganization, useUser } from "@clerk/nextjs";
+import { clerkClient, currentUser, useOrganization, useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 
@@ -9,7 +9,7 @@ import { FileCard } from "./file-card";
 import Image from "next/image";
 import { GridIcon, ListIcon, Loader2 } from "lucide-react";
 import { SearchBar } from "./search-bar";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DataTable } from "./file-table";
 import { columns } from "./columns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -27,6 +27,7 @@ import { getAllFavorites, getFilesFromAWS } from "@/actions/aws/files";
 import { set } from "date-fns";
 import { getSessionStorage, setSessionStorage } from "@/hooks/useSessionStorage";
 import { TagFilter } from "./tag-filter";
+import { getClerkUser, removeEncryptionKeyToUser, setEncryptionKeyToUser } from "@/actions/aws/users";
 
 
 function Placeholder() {
@@ -59,33 +60,33 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
   const [filterTag, setFilterTag] = useState(["all"] as string[]);
 
   let orgId = organization.isLoaded && user.isLoaded ? (organization.organization?.id ?? user.user?.id) : undefined;
+  let orgOrUser = organization.isLoaded && user.isLoaded ? !organization.organization ? user.user : organization.organization : undefined;
 
-  const fetchFiles = () => {
+  const fetchFiles = useCallback(() => {
     if (orgId) {
-      getFilesFromAWS({ 
-        orgId, 
-        query, 
-        filterFavorites, 
-        deletedOnly, 
+      setIsLoading(true);
+      getFilesFromAWS({
+        orgId,
+        query,
+        favorites: filterFavorites,
+        deletedOnly,
         type: type === "all" ? undefined : type,
         filterTag: filterTag.includes("all") ? undefined : filterTag,
-      })
-        .then((fetchedFiles) => {
-          setFiles(fetchedFiles as File[]);
-          setIsLoading(false);
-        });
+      }).then((fetchedFiles) => {
+        setFiles(fetchedFiles as File[]);
+        setIsLoading(false);
+      });
     }
-  }
+  }, [orgId, query, filterFavorites, deletedOnly, type, filterTag]);
 
-  const fetchFavorites = () => {
+  const fetchFavorites = useCallback(() => {
     if (orgId) {
-      getAllFavorites(orgId)
-        .then(favorites => {
-          if (!favorites) return [];
-          setFavorites(favorites);
-        });
+      getAllFavorites(orgId).then((favorites) => {
+        if (!favorites) return [];
+        setFavorites(favorites);
+      });
     }
-  }
+  }, [orgId]);
 
   useEffect(() => {
     // Inital set loading
@@ -95,6 +96,7 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
     window.addEventListener('fileUploaded', fetchFiles);
 
     // Fetch files initially
+    console.log("Fetching files form browser")
     fetchFavorites();
     fetchFiles()
 
@@ -116,7 +118,7 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
           <div className="flex flex-col gap-y-4 md:flex-row justify-between items-center mb-8">
             <h1 className="text-4xl font-bold">{title}</h1>
             <SearchBar query={query} setQuery={setQuery} />
-            <UploadButton />
+            <UploadButton orgOrUser={orgOrUser}/>
           </div>
           <Tabs defaultValue="grid" className="w-full">
             <div className="flex flex-col md:flex-row justify-between items-center">
@@ -163,7 +165,7 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
             <TabsContent value="grid">
               <div className="grid md:grid-cols-3 gap-4">
                 {modifiedFiles?.map((file) => {
-                  return <FileCard key={file.fileId} file={file} />;
+                  return <FileCard key={file.fileId} file={file} user={orgOrUser}/>;
                 })}
               </div>
             </TabsContent>

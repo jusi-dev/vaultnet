@@ -1,3 +1,5 @@
+"use client"
+
 import { Doc, Id } from "../../../../convex/_generated/dataModel";
 import {
     DropdownMenu,
@@ -26,44 +28,99 @@ import {
 import { DownloadIcon, Eye, MoreVertical, Share2Icon, ShareIcon, StarHalf, StarIcon, TagIcon, Trash2Icon, UndoIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { Protect } from "@clerk/nextjs";
+import { Protect, currentUser, useOrganization, useUser } from "@clerk/nextjs";
 import { ShareButton } from "./share-button";
-import { deleteFile, deleteFilePermanently, restoreFile, toggleFavorite } from "@/actions/aws/files";
+import { createPresignedDownloadUrl, deleteFile, deleteFilePermanently, restoreFile, toggleFavorite } from "@/actions/aws/files";
 import { getMe } from "@/actions/aws/users";
 import TagManager from "./tag-manager";
 import { TagCreator } from "./tag-creator";
 import { FilePreviewer } from "./file-previewer";
 
-export function useFileUrlGenerator () {
-    const getFileUrl = async (fileId: Id<"_storage"> | string, shareTime: number) => {
-        if (!fileId) {
-            return '';
-        }
+export async function decryptAndDownloadURL (downloadUrl: string, userObj: any, isFileEncrypted: boolean) {
+    let _url;
+    let encryptionKey;
+    let encryptionKeyMD5;
 
-        if (!shareTime) {
-            shareTime = 600
-        }
-
-        try {
-            const formData = new FormData();
-            await formData.append('fileId', fileId);
-            await formData.append('orgId', "1245") // TODO: Add real orgId
-            await formData.append('shareTime', shareTime.toString())
-            // const res = await generateDownloadUrl({ fileId })
-            const res = await fetch('/api/downloadfile', {
-                method: 'POST',
-                body: formData
-            }).then(res => res.json())
-            return res.downloadUrl as string || '';
-        } catch (error) {
-            return ''; // Return an empty string in case of error
-        }
+    if (!userObj.organization?.id) {
+        encryptionKey = userObj!.publicMetadata?.encryptionKeyBase64 as string;
+        encryptionKeyMD5 = userObj!.publicMetadata?.encryptionKeyMD5Base64 as string;
+    } else {
+        encryptionKey = userObj!.organization?.publicMetadata?.encryptionKeyBase64 as string;
+        encryptionKeyMD5 = userObj!.organization?.publicMetadata?.encryptionKeyMD5Base64 as string;
     }
-    return getFileUrl;
+
+    try {
+        // Check if isFileEncrypted is true, if true add headers to fetch if not just fetch the file
+        let headers;
+        if (isFileEncrypted) {
+            headers = {
+                "x-amz-server-side-encryption-customer-algorithm": encryptionKey && "AES256",
+                "x-amz-server-side-encryption-customer-key": encryptionKey && encryptionKey,
+                "x-amz-server-side-encryption-customer-key-MD5": encryptionKeyMD5 && encryptionKeyMD5,
+            }
+        }
+
+
+        const response = await fetch(downloadUrl, {
+            method: 'GET',
+            headers,
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        _url = window.URL.createObjectURL(blob);
+
+    } catch (error) {
+        console.error("Error during fetch and decryption:", error);
+        _url = undefined;
+    }
+    
+    return _url;
+}
+
+export async function getFileUrl(fileId: any | string, shareTime: number, userObj: any) {
+    let encryptionKey;
+    let encryptionKeyMD5;
+
+    if (!userObj.organization?.id) {
+        encryptionKey = userObj!.publicMetadata?.encryptionKeyBase64 as string;
+        encryptionKeyMD5 = userObj!.publicMetadata?.encryptionKeyMD5Base64 as string;
+    } else {
+        encryptionKey = userObj!.organization?.publicMetadata?.encryptionKeyBase64 as string;
+        encryptionKeyMD5 = userObj!.organization?.publicMetadata?.encryptionKeyMD5Base64 as string;
+    }
+
+    if (!fileId) {
+        return '';
+    }
+
+    if (!shareTime) {
+        shareTime = 600
+    }
+
+    try {
+        const formData = new FormData();
+        await formData.append('fileId', fileId);
+        await formData.append('shareTime', shareTime.toString())
+        await formData.append('encryptionKey', encryptionKey)
+        await formData.append('encryptionKeyMD5', encryptionKeyMD5)
+
+        const res = await fetch('/api/downloadfile', {
+            method: 'POST',
+            body: formData
+        }).then(res => res.json())
+        return res.downloadUrl as string || '';
+    } catch (error) {
+        console.error("Error generating download URL:", error);
+        return ''; // Return an empty string in case of error
+    }
 }
   
   
-export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorited: boolean ,file: Doc<"files">, downloadUrl: string }) {
+export function FileCardActions({ isFavorited, file, downloadUrl, user }: { isFavorited: boolean, file: any, downloadUrl: string, user: any }) {
     const { toast } = useToast();
 
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -71,6 +128,8 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
     const [isTagOpen, setIsTagOpen] = useState(false);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [me, setMe] = useState<any>(null);
+
+    const userObj = useUser();
 
     useEffect(() => {
         (async () => {
@@ -88,7 +147,7 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                     <AlertDialogHeader>
                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This action will mark the file as deleted. The file gets deleted in 30 days permanentely.
+                        This action will mark the file as deleted. The file gets deleted in 10 days permanentely.
                     </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -99,14 +158,14 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                         toast({
                             variant: "destructive",
                             title: "File moved to Trash",
-                            description: "Your file will be permanently deleted in 20 days.",
+                            description: "Your file will be permanently deleted in 10 days.",
                         })
                     }}>Continue</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
 
-            <ShareButton isShareOpen={isShareOpen} setIsShareOpen={setIsShareOpen} fileId={file.fileId}/>
+            <ShareButton isShareOpen={isShareOpen} setIsShareOpen={setIsShareOpen} fileId={file.fileId} orgOrUser={user}/>
 
             <FilePreviewer isPreviewOpen={isPreviewOpen} setIsPreviewOpen={setIsPreviewOpen} file={file} fileUrl={downloadUrl}/>
 
@@ -154,7 +213,7 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                         </DropdownMenuPortal>
                     </DropdownMenuSub>
                     <DropdownMenuItem
-                        onClick={() => {
+                        onClick={async () => {
                             window.open( downloadUrl, "_blank")
                         }}
                     >
@@ -213,7 +272,17 @@ export function FileCardActions({ isFavorited, file, downloadUrl }: { isFavorite
                             <DropdownMenuItem
                                 onClick={() => {
                                     if (file.shouldDelete) {
-                                        deleteFilePermanently(file.fileId, '');
+                                        let encryptionKey;
+                                        let encryptionKeyMD5;
+
+                                        if (!user.organization?.id) {
+                                            encryptionKey = user!.publicMetadata?.encryptionKeyBase64 as string;
+                                            encryptionKeyMD5 = user!.publicMetadata?.encryptionKeyMD5Base64 as string;
+                                        } else {
+                                            encryptionKey = user!.organization?.publicMetadata?.encryptionKeyBase64 as string;
+                                            encryptionKeyMD5 = user!.organization?.publicMetadata?.encryptionKeyMD5Base64 as string;
+    }
+                                        deleteFilePermanently(file.fileId, '', encryptionKey, encryptionKeyMD5, file.isEncrypted);
                                         window.dispatchEvent(new CustomEvent('fileUploaded'));
                                         toast({
                                             variant: "success",

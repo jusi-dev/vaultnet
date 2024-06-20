@@ -2,10 +2,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { MailCheckIcon } from "lucide-react";
 import { InstagramOutlined, LinkedinOutlined, TwitterOutlined } from "@ant-design/icons";
-import { PaymentElement } from "@stripe/react-stripe-js";
 
 export function Footer() {
-    return <div className="py-20 bg-orange-400 mt-12 flex flex-col items-center">
+    return <div className="py-20 bg-orange-400 dark:bg-orange-700 mt-12 flex flex-col items-center ">
         <div className="container mx-auto flex flex-col md:flex-row gap-y-8 justify-between text-white ">
             <div className="mr-14">
                 <Link href={"/"} className="flex items-center gap-2 font-bold text-2xl cursor-pointer text-white">

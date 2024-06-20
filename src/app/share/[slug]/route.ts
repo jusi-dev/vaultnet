@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getLink, setLink } from "./aws-actions";
+import { getShareLink, setShareLink } from "@/actions/aws/files";
 
 function randomIdGenerator () {
     let result = '';
@@ -21,7 +22,7 @@ export const POST = async (req : Request, res : NextResponse) => {
     const shareLinkId = randomIdGenerator();
 
     try {
-        await setLink(shareLinkId, targetLink as string);
+        await setShareLink(shareLinkId, targetLink as string);
 
         return new Response(JSON.stringify({
             shareUrl: `${process.env.PAGE_URL}/share/${shareLinkId}`
@@ -35,7 +36,8 @@ export const GET = async (_ : any, {params} : any) => {
     let result;
 
     try {
-        result = await getLink(params.slug);
+        const {targetLink} = await getShareLink(params.slug);
+        result = targetLink;
     } catch (error) {
         console.error("Error querying the database:", error);
         return new Response(`<h1>/${params.slug} is not in our record</h1>`, {
@@ -54,6 +56,5 @@ export const GET = async (_ : any, {params} : any) => {
             },
         });
     }
-
     return NextResponse.redirect(result, 302);
 };

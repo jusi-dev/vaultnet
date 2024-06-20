@@ -1,17 +1,19 @@
 'use client'
 
 import { Button } from "@/components/ui/button";
-import { OrganizationSwitcher, SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { OrganizationSwitcher, SignInButton, SignedIn, SignedOut, UserButton, currentUser, useUser } from "@clerk/nextjs";
 import { Database, Menu, SubscriptIcon, Wallet } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SubscriptionOverview from "./subscriptions/_components/subscriptionoverview";
 import StorageUsage from "./_components/clerk/storageusage";
+import { setEncryptionKeyToUser } from "@/actions/aws/users";
 
 export function Header() {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState<boolean>(false);
+
     return (
         <>
             {/* <div className="w-full bg-orange-500 py-4 text-white flex text-center">
@@ -73,12 +75,18 @@ export function Header() {
                         </div>
                     }
 
-                    <div className="hidden md:flex gap-x-4 justify-center items-center">
-                        <Link href={"/subscriptions"} className="flex items-center text-gray-600 gap-2 font-semibold underline underline-offset-2 text-lg cursor-pointer hover:text-orange-500">
-                            Subscriptions
+                    <div className="hidden md:flex gap-x-6 justify-center items-center">
+                        <Link href={"/subscriptions"} className="text-center flex items-center text-gray-600 gap-2 font-semibold text-lg cursor-pointer hover:text-orange-500">
+                            About
+                        </Link>
+                        <Link href={"/subscriptions"} className="text-center flex items-center text-gray-600 gap-2 font-semibold text-lg cursor-pointer hover:text-orange-500">
+                            Contact
+                        </Link>
+                        <Link href={"/subscriptions"} className="text-center flex items-center whitespace-nowrap text-gray-600 gap-2 font-semibold text-lg cursor-pointer hover:text-orange-500">
+                            Pricing
                         </Link>
                         <SignedIn>
-                            <Button variant={"outline"} className="ml-10">
+                            <Button variant={"outline"} className="ml-4">
                                 <Link href="/dashboard/files">Your Files</Link>
                             </Button>
                         </SignedIn>

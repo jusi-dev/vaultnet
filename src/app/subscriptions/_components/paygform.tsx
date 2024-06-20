@@ -6,12 +6,7 @@ import React, { useState } from "react";
 
 import { formatAmountForDisplay } from "@/utils/stripe-helpers";
 import * as config from "@/config";
-import { createCheckoutSession } from "@/actions/stripe";
-import getStripe from "@/utils/get-stripejs";
-import {
-  EmbeddedCheckout,
-  EmbeddedCheckoutProvider,
-} from "@stripe/react-stripe-js";
+import { createCheckoutSession, enablePAYGCheckout } from "@/actions/stripe";
 import { Button } from "@/components/ui/button";
 
 interface CheckoutFormProps {
@@ -19,20 +14,17 @@ interface CheckoutFormProps {
   subscriptionType: string;
 }
 
-export default function CheckoutForm(props: CheckoutFormProps): JSX.Element {
+export default function PAYGForm(props: CheckoutFormProps): JSX.Element {
 
   const [loading] = useState<boolean>(false);
   const [input, setInput] = useState<{ customDonation: number }>({customDonation: 10});
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
 
   const formAction = async (data: FormData): Promise<void> => {
     const uiMode = data.get(
       "uiMode",
     ) as Stripe.Checkout.SessionCreateParams.UiMode;
     const subscriptionType = props.subscriptionType;
-    const { client_secret, url } = await createCheckoutSession(data, subscriptionType);
-
-    if (uiMode === "embedded") return setClientSecret(client_secret);
+    const { client_secret, url } = await enablePAYGCheckout(data, subscriptionType);
 
     window.location.assign(url as string);
   };
@@ -41,18 +33,10 @@ export default function CheckoutForm(props: CheckoutFormProps): JSX.Element {
     <>
       <form action={formAction}>
         <input type="hidden" name="uiMode" value={props.uiMode} />
-        <Button variant="orange" className="text-2xl w-full cursor-pointer" size={"landing"} type="submit">
-          Start Now
+        <Button variant={"orange"} type="submit" disabled={loading}>
+          Enable Pay-As-You-Go
         </Button>
       </form>
-      {/* {clientSecret ? (
-        <EmbeddedCheckoutProvider
-          stripe={getStripe()}
-          options={{ clientSecret }}
-        >
-          <EmbeddedCheckout />
-        </EmbeddedCheckoutProvider>
-      ) : null} */}
     </>
   );
 }

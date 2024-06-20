@@ -40,7 +40,7 @@ export async function POST(req : Request, res: NextApiResponse){
         Metadata: {
           'OrgId': orgId as string,
         },
-        ContentType: (file as unknown as File).type
+        ContentType: (file as unknown as File).type,
       });
 
       await s3Client.send(uploadCommand);

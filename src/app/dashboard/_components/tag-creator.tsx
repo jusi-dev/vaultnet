@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { addTagToFile } from "@/actions/aws/files";
+import { addTagToUser } from "@/actions/aws/users";
 
 const formSchema = z.object({
     tag: z.string().min(1).max(20),
@@ -24,6 +25,7 @@ export function TagCreator({ isTagOpen, setIsTagOpen, file }: { isTagOpen: boole
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         addTagToFile(file.fileId, values.tag.toLowerCase(), values.color)
+        addTagToUser(values.tag.toLowerCase(), values.color)
         form.reset()
         setIsTagOpen(false)
         window.dispatchEvent(new CustomEvent('fileUploaded'));
@@ -68,7 +70,7 @@ export function TagCreator({ isTagOpen, setIsTagOpen, file }: { isTagOpen: boole
                             <Button type="submit"
                                 disabled={form.formState.isSubmitting} className="flex gap-1">
                                 {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" /> }
-                                Share
+                                Create Tag
                             </Button>
                         </form>
                     </Form>

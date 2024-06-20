@@ -4,9 +4,11 @@ import { formatRelative } from "date-fns"
 import { useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { FileCardActions, useFileUrlGenerator } from "./file-actions"
+import { FileCardActions, decryptAndDownloadURL, getFileUrl } from "./file-actions"
 import { useEffect, useState } from "react"
 import { getUserById } from "@/actions/aws/users"
+import { useAuth, useOrganization, useUser } from "@clerk/nextjs"
+import { getSingleFile } from "@/actions/aws/files"
 
 interface User {
     name: string;
@@ -43,19 +45,23 @@ function UserCell({userId} : {userId: string}) {
 
 function ActionsCell({row} : {row: {original: Doc<"files"> & { isFavorited: boolean }}}) {
     const [downloadUrl, setDownloadUrl] = useState<string>('');
-    const getFileUrl = useFileUrlGenerator();
+    const user = useUser();
+    const organization = useOrganization();
+    let orgOrUser = organization.isLoaded && user.isLoaded ? !organization.organization ? user.user : organization.organization : undefined;
 
     useEffect(() => {
         (async () => {
-            const url = await getFileUrl(row.original.fileId, 600);
-            setDownloadUrl(url);
+            const url = await getFileUrl(row.original.fileId, 36000, orgOrUser);
+            const file = await getSingleFile(row.original.fileId);
+            const downloadUrl = await decryptAndDownloadURL(url, orgOrUser, file!.isEncrypted);
+            setDownloadUrl(downloadUrl as string);
         })();
     
     })
 
     return (
         <div>
-            <FileCardActions isFavorited={row.original.isFavorited} file={row.original} downloadUrl={downloadUrl}/>
+            <FileCardActions isFavorited={row.original.isFavorited} file={row.original} downloadUrl={downloadUrl} user={user}/>
         </div>
     )
 }

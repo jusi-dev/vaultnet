@@ -2,11 +2,44 @@
 
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { PutCommand, DynamoDBDocumentClient, GetCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
-import { currentUser } from "@clerk/nextjs";
+import { clerkClient, currentUser } from "@clerk/nextjs";
 import { sub } from "date-fns";
+import { addToPAYG } from "../stripe";
+import { generateEncryptionKey } from "@/utils/crypto";
 
 const dbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(dbClient);
+
+export const setEncryptionKeyToUser = async (userId: string) => {
+    const { encryptionKeyBase64, encryptionKeyMD5Base64 } = await generateEncryptionKey();
+    await clerkClient.users.updateUserMetadata(userId, { 
+        publicMetadata: {
+            encryptionKeyBase64,
+            encryptionKeyMD5Base64
+        }
+     });
+}
+
+export const setEncryptionKeyToOrg = async (orgId: any) => {
+    const { encryptionKeyBase64, encryptionKeyMD5Base64 } = await generateEncryptionKey();
+    await clerkClient.organizations.updateOrganizationMetadata(orgId, {
+        publicMetadata: {
+            encryptionKeyBase64,
+            encryptionKeyMD5Base64
+        }
+    })
+}
+
+export const removeEncryptionKeyToUser = async (userId: string) => {
+    const { encryptionKeyBase64, encryptionKeyMD5Base64 } = await generateEncryptionKey();
+    await clerkClient.users.updateUserMetadata(userId, { 
+        publicMetadata: {
+            encryptionKeyBase64: null,
+            encryptionKeyMD5Base64: null
+        }
+     });
+}
+
 
 export const createUser = async (user: any) => {
     const command = new PutCommand({
@@ -19,10 +52,20 @@ export const createUser = async (user: any) => {
             tokenIdentifier: `https://${process.env.CLERK_HOSTNAME}|${user.id}`,
             subscriptionType: "free",
             mbsUploaded: 0,
+            payAsYouGo: false,
         }
     });
-
     const response = await docClient.send(command);
+
+    await setEncryptionKeyToUser(user.id);
+}
+
+export const createEncryptionKeyForOrg = async (data: any) => {
+    const orgId = data.organization.id;
+
+    if (!data.organization.public_metadata.encryptionKeyBase64) {
+        await setEncryptionKeyToOrg(orgId);
+    }
 }
 
 export const updateUser = async (data: any) => {
@@ -40,8 +83,13 @@ export const updateUser = async (data: any) => {
     await docClient.send(updateCommand);
 }
 
-export const updateSubscription = async (userId: any, customerId: string, subscriptionType: string, canceledSub?: boolean) => {
+export const updateSubscription = async (userId: any, customerId: string, subscriptionType: string, periodEnd: number, canceledSub?: boolean) => {
     const user = await getUserById(userId);
+
+    // Remove periodEnd from user if canceled sub is true
+    delete user.periodEnd;
+
+    delete user.canceledSubscription;
 
     const updateCommand = new PutCommand({
         TableName: 'vaultnet-users',
@@ -49,7 +97,23 @@ export const updateSubscription = async (userId: any, customerId: string, subscr
             ...user,
             subscriptionType,
             customerId,
-            canceledSubscription: canceledSub ? new Date().getTime() : "false"
+            canceledSubscription: canceledSub && periodEnd,
+            periodEnd: !canceledSub ? periodEnd : null
+        }
+    });
+
+    await docClient.send(updateCommand);
+}
+
+export const cancelSubscription = async (userId: any, periodEnd: any) => {
+    const user = await getUserById(userId);
+
+    const updateCommand = new PutCommand({
+        TableName: 'vaultnet-users',
+        Item: {
+            ...user,
+            canceledSubscription: periodEnd,
+            periodEnd
         }
     });
 
@@ -188,6 +252,9 @@ export const updatedMbsUploaded = async (data: any, addToUser: boolean, userId: 
     const currentUser = userId;
 
     const userData = await getUserById(currentUser);
+    const subscriptionSize = await getSubscriptionStorage(userData.subscriptionType);
+
+    console.log("This is the subscription size: ", subscriptionSize.size)
 
     if (addToUser) {
         const hasEnoughSpace = await hasUserEnoughSpace(userData, fileSize);
@@ -200,19 +267,37 @@ export const updatedMbsUploaded = async (data: any, addToUser: boolean, userId: 
     let updateCommand;
 
     if (addToUser) {
-        updateCommand = new PutCommand({
-            TableName: 'vaultnet-users',
-            Item: {
-                ...userData,
-                mbsUploaded: userData.mbsUploaded + fileSize
-            }
-        });
+        if (userData.mbsUploaded + fileSize > subscriptionSize.size) {
+            // Get the overused space
+            const overusedSpace = userData.mbsUploaded + fileSize - subscriptionSize.size;
+            addToPAYG(userData.customerId, overusedSpace.toString(), userData.userid);
+            updateCommand = new PutCommand({
+                TableName: 'vaultnet-users',
+                Item: {
+                    ...userData,
+                    mbsUploaded: userData.mbsUploaded + fileSize,
+                    PAYGuage: overusedSpace
+                }
+            });
+        } else {
+            updateCommand = new PutCommand({
+                TableName: 'vaultnet-users',
+                Item: {
+                    ...userData,
+                    mbsUploaded: userData.mbsUploaded + fileSize
+                }
+            });
+        }
     } else {
+        let newSize = userData.mbsUploaded - fileSize;
+        if (newSize < 0) {
+            newSize = 0;
+        }
         updateCommand = new PutCommand({
             TableName: 'vaultnet-users',
             Item: {
                 ...userData,
-                mbsUploaded: userData.mbsUploaded - fileSize
+                mbsUploaded: newSize
             }
         });
     }
@@ -223,9 +308,18 @@ export const updatedMbsUploaded = async (data: any, addToUser: boolean, userId: 
 const hasUserEnoughSpace = async (userData: any, currentFileSize: number) => {
     const subscriptionSize = await getSubscriptionStorage(userData.subscriptionType);
 
-    if (userData.mbsUploaded + currentFileSize <= subscriptionSize.size) {
+    console.log("User has uploaded: ", userData.mbsUploaded)
+    console.log("Current file size: ", currentFileSize)
+    console.log("Subscription size: ", subscriptionSize.size)
+
+    if (userData.payAsYouGo === true) {
+        console.log("User has enough space")
+        return true;
+    } else if (userData.mbsUploaded + currentFileSize < subscriptionSize.size) {
+        console.log("User has enough space")
         return true;
     } else {
+        console.log("User doesn't has enough space")
         return false;
     }
 }
@@ -238,7 +332,17 @@ export const getUserId = async () => {
     }
   
     return user.id;
-  }
+}
+
+export const getClerkUser = async () => {
+    const user = await currentUser();
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    return {user};
+}
 
 export const getMe = async () => {
     const userId = await getUserId();
@@ -265,7 +369,7 @@ export const getSubscriptionStorage = async (subscriptionType: string) => {
     const response = await docClient.send(command);
 
     if (!response.Item) {
-        throw new Error("User not found");
+        throw new Error("Subscription not found");
     }
 
     return response.Item;
@@ -291,11 +395,47 @@ export const getExceededStorageUsers = async () => {
     let exceededUsers: any[] = [];
 
     for (const user of users) {
-        const subscriptionType = user?.subscriptionType?.S || ''; // Extract the string value from the 'AttributeValue' object
+        const subscriptionType = user?.subscriptionType?.S || 'free'; // Extract the string value from the 'AttributeValue' object
         const subscriptionSize = await getSubscriptionStorage(subscriptionType);
+        const PAYGperiodEnd = user?.canceledPAYG;
+        const periodEnd = user?.canceledSubscription;
+
+        // Skip user if PAYGPeriodEnd or periodEnd is not older than 10 days
+        if (PAYGperiodEnd) {
+            const now = new Date();
+            const paygTime = parseInt(user?.canceledPAYG.N || "0");
+            const diff = now.getTime() - (paygTime * 1000);
+            const diffDays = diff / ( 1000 * 60 * 60 * 24 );
+            console.log("PAYG: This is the time: ", now.getTime())
+            console.log("PAYG: This is the PAYGPeriodEnd: ", user?.canceledPAYG.N || 0 * 1000)
+            console.log("PAYG: This is the diffTime: ", diff)
+            console.log("PAYG: This is the diff: ", diffDays)
+
+            if (diffDays < 10) {
+                continue;
+            }
+        }
+
+        if (periodEnd) {
+            const now = new Date();
+            const subscriptionEnd = parseInt(user?.canceledSubscription.N || "0");
+            const diff = now.getTime() - (subscriptionEnd * 1000);
+            const diffDays = diff / ( 1000 * 60 * 60 * 24);
+            console.log("This is the username: ", user.name)
+            console.log("SUB: This is the sub end: ", subscriptionEnd)
+            console.log("SUB: This is the diff: ", diffDays)
+
+            if (diffDays < 10) {
+                continue;
+            }
+        }
 
         if (!user.mbsUploaded?.N) {
             user.mbsUploaded = { N: "0" };
+        }
+
+        if (user.payAsYouGo?.BOOL === true) {
+            continue;
         }
 
         if (user.mbsUploaded?.N > subscriptionSize.size) {
@@ -316,4 +456,187 @@ export const getAllSubscriptions = async () => {
     const response = await docClient.send(command);
 
     return response.Items;
+}
+
+export const addTagToUser = async (tag: string, color: string) => {
+    const userId = await getUserId();
+
+    const user = await getUserById(userId);
+
+    const customTags = user.customTags || [];
+
+    customTags.push({ tag, color });
+
+    const updateCommand = new PutCommand({
+        TableName: 'vaultnet-users',
+        Item: {
+            ...user,
+            customTags
+        }
+    });
+
+    await docClient.send(updateCommand);
+}
+
+export const getCustomTags = async () => {
+    const userId = await getUserId();
+
+    const user = await getUserById(userId);
+
+    return user.customTags || [];
+}
+
+export const deleteTagFromUser = async (tag: string) => {
+    const userId = await getUserId();
+
+    const user = await getUserById(userId);
+
+    const customTags = user.customTags || [];
+
+    const updatedTags = customTags.filter((item: any) => item.tag !== tag);
+
+    const updateCommand = new PutCommand({
+        TableName: 'vaultnet-users',
+        Item: {
+            ...user,
+            customTags: updatedTags
+        }
+    });
+
+    await docClient.send(updateCommand);
+}
+
+const defaultTags = [
+    {tag: "picture", color: "#4ade80"},
+    {tag: "video", color: "#60a5fa"},
+    {tag: "document", color: "#facc15"},
+    {tag: "audio", color: "#f87171"},
+    {tag: "other", color: "#c084fc"},
+]
+
+export const setInitinalTagsTrue = async () => {
+    const userId = await getUserId();
+
+    const user = await getUserById(userId);
+
+    const updateCommand = new PutCommand({
+        TableName: 'vaultnet-users',
+        Item: {
+            ...user,
+            customTags: defaultTags,
+            setInitinalTagsTrue: true
+        }
+    });
+
+    await docClient.send(updateCommand);
+}
+
+export const setPAYGIdentifier = async (PAYGidentifier: string, userId: string) => {
+    const user = await getUserById(userId);
+
+    const updateCommand = new PutCommand({
+        TableName: 'vaultnet-users',
+        Item: {
+            ...user,
+            PAYGidentifier,
+            payAsYouGo: true
+        }
+    });
+
+    await docClient.send(updateCommand);
+}
+
+export const enablePAYG = async (userId: string, customerId: string, PAYGStart: number, periodEnd: number) => {
+    const user = await getUserById(userId);
+
+    if (user.payAsYouGo) {
+        return;
+    }
+
+    if (user.canceledPAYG) {
+        delete user.canceledPAYG;
+    }
+
+    const updateCommand = new PutCommand({
+        TableName: 'vaultnet-users',
+        Item: {
+            ...user,
+            payAsYouGo: true,
+            customerId,
+            PAYGStart,
+            PAYGperiodEnd: periodEnd
+        }
+    });
+
+    await docClient.send(updateCommand);
+}
+
+export const disablePAYG = async (userId: string) => {
+    const user = await getUserById(userId);
+
+    if (!user.payAsYouGo) {
+        return;
+    }
+
+    delete user.PAYGperiodEnd;
+
+    const updateCommand = new PutCommand({
+        TableName: 'vaultnet-users',
+        Item: {
+            ...user,
+            payAsYouGo: false,
+        }
+    });
+
+    await docClient.send(updateCommand);
+
+    await resetPAYGUsage(userId);
+}
+
+export const endPAYG = async (userId: string, PAYGperiodEnd: any) => {
+    const user = await getUserById(userId);
+
+    const updateCommand = new PutCommand({
+        TableName: 'vaultnet-users',
+        Item: {
+            ...user,
+            canceledPAYG: PAYGperiodEnd,
+            PAYGperiodEnd
+        }
+    });
+
+    await docClient.send(updateCommand);
+}
+
+export const resetPAYGUsage = async (userId: string) => {
+    const user = await getUserById(userId);
+
+    const updateCommand = new PutCommand({
+        TableName: 'vaultnet-users',
+        Item: {
+            ...user,
+            PAYGuage: 0
+        }
+    });
+
+    await docClient.send(updateCommand);
+}
+
+export const calculateOverusedSpace = async (user: any) => {
+    const subscription = await getSubscriptionStorage(user.subscriptionType);
+
+    return user.mbsUploaded - subscription.size;
+}
+
+export const transferPAYGUsage = async (user: any, overusedSpace: number) => {
+
+    const updateCommand = new PutCommand({
+        TableName: 'vaultnet-users',
+        Item: {
+            ...user,
+            PAYGuage: overusedSpace
+        }
+    });
+
+    await docClient.send(updateCommand);
 }

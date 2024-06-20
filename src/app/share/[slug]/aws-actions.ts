@@ -1,7 +1,9 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { PutCommand, DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 
-const dbClient = new DynamoDBClient({});
+const dbClient = new DynamoDBClient({
+    region: 'eu-central-1'
+});
 const docClient = DynamoDBDocumentClient.from(dbClient);
 
 export const setLink = async (id: string, targetLink: string) => {

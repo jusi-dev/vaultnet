@@ -3,8 +3,11 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { getSubscriptionStorage, getUserById, getUserId, updatedMbsUploaded } from "./users";
 import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
-import { DeleteObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { CopyObjectCommand, DeleteObjectCommand, GetObjectCommand, HeadObjectCommand, MetadataDirective, PutObjectCommand, S3Client, ServerSideEncryption } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { currentUser, useUser } from "@clerk/nextjs";
+import { Copy, Key } from "lucide-react";
+import { Share } from "next/font/google";
 
 
 const dbClient = new DynamoDBClient({});
@@ -42,7 +45,7 @@ async function hasAccessToOrg(orgId: string, isCron?: boolean) {
     return { user };
 }
 
-export const createFileInDB = async (name: string, fileId: string, orgId: string, type: string) => {
+export const createFileInDB = async (name: string, fileId: string, orgId: string, type: string, fileSize: number, isEncrypted?: boolean) => {
     let date = new Date();
     const hasAccess = await hasAccessToOrg(orgId)
 
@@ -59,7 +62,9 @@ export const createFileInDB = async (name: string, fileId: string, orgId: string
             orgId,
             type,
             userId: hasAccess.user.userid,
-            _creationTime: date.getTime()
+            _creationTime: date.getTime(),
+            fileSize,
+            isEncrypted,
         }
     });
 
@@ -131,6 +136,7 @@ export const getFilesFromAWS = async (data: any) => {
 }
 
 export const hasAccessToFile = async (fileId: string) => {
+    console.log("Triggered hasAccessToFile")
     const file = await docClient.send(new GetCommand({
         TableName: 'vaultnet-files',
         Key: {
@@ -204,7 +210,7 @@ export const getAllFavorites = async (orgId: string) => {
     return response.Items;
 }
 
-const getSingleFile = async (fileId: string) => {
+export const getSingleFile = async (fileId: string) => {
     const file = await docClient.send(new GetCommand({
         TableName: 'vaultnet-files',
         Key: {
@@ -265,7 +271,8 @@ export const restoreFile = async (fileId: string) => {
     }));
 }
 
-export const deleteFilePermanently = async (fileId: string, cronAuth: string) => {
+export const 
+deleteFilePermanently = async (fileId: string, cronAuth: string, encryptionKey?: string, encryptionKeyMD5?: string, isFileEncrypted?: boolean) => {
     const file = await getSingleFile(fileId);
 
     if (cronAuth) {
@@ -295,12 +302,31 @@ export const deleteFilePermanently = async (fileId: string, cronAuth: string) =>
         }
     }));
 
-    const deleteParams = {
-        Bucket: "vaultnet",
-        Key: fileId
+    // TODO: Add the encryption key if needed
+
+    let headParams;
+
+    if (isFileEncrypted === true) {
+        headParams = {
+            Bucket: "vaultnet",
+            Key: fileId,
+            SSECustomerAlgorithm: encryptionKey && "AES256",
+            SSECustomerKey: encryptionKey && encryptionKey,
+            SSECustomerKeyMD5: encryptionKeyMD5 && encryptionKeyMD5,
+        }
+    } else {
+        headParams = {
+            Bucket: "vaultnet",
+            Key: fileId,
+        }
     }
 
-    const headData = await s3Client.send(new HeadObjectCommand(deleteParams))
+    const deleteParams = {
+        Bucket: "vaultnet",
+        Key: fileId,
+    }
+
+    const headData = await s3Client.send(new HeadObjectCommand(headParams))
     const fileSize = headData.ContentLength
 
     const fileData = {
@@ -313,7 +339,7 @@ export const deleteFilePermanently = async (fileId: string, cronAuth: string) =>
     await s3Client.send(new DeleteObjectCommand(deleteParams))
 }
 
-export const createPresignedUploadUrl = async (orgId: string, fileData: any) => {
+export const createPresignedUploadUrl = async (orgId: string, fileData: any, encryptionKey: string, encryptionKeyMD5: string) => {
     const { fileSize, fileName, fileType, fileExtension } = fileData;
 
     if (!fileData || !orgId) {
@@ -327,6 +353,7 @@ export const createPresignedUploadUrl = async (orgId: string, fileData: any) => 
     }
 
     const userId = await getUserId();
+    const user = await currentUser();
 
     try {
         await updatedMbsUploaded(fileSizeData, true, userId)
@@ -339,11 +366,12 @@ export const createPresignedUploadUrl = async (orgId: string, fileData: any) => 
             Bucket: "vaultnet",
             Key: fileKey,
             ContentType: fileType as string,
+            SSECustomerAlgorithm: encryptionKey && "AES256",
+            SSECustomerKey: encryptionKey && encryptionKey,
+            SSECustomerKeyMD5: encryptionKeyMD5 && encryptionKeyMD5,
         });
-        console.log("This is the server fileType: ", fileType)
 
         const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
-        console.log("Upload URL: ", uploadUrl)
 
         const responseData = {
             fileKey,
@@ -354,6 +382,29 @@ export const createPresignedUploadUrl = async (orgId: string, fileData: any) => 
         return responseData
     } catch(err) {
         return { error: 'File upload failed ' + err, status: 500 };
+    }
+}
+
+export const createPresignedDownloadUrl = async (fileId: string, user: any) => {
+    const client = new S3Client();
+
+    const userEncryptionKey = user.user?.publicMetadata?.encryptionKeyBase64 as string;
+    const userEncryptionKeyMD5 = user.user?.publicMetadata?.encryptionKeyMD5Base64 as string;
+
+    try {
+
+        const command = new GetObjectCommand({ 
+        Bucket: "vaultnet", 
+        Key: fileId,
+        SSECustomerAlgorithm: userEncryptionKey && "AES256",
+        SSECustomerKey: userEncryptionKey && userEncryptionKey,
+        SSECustomerKeyMD5: userEncryptionKeyMD5 && userEncryptionKeyMD5,
+        });
+        const url = await getSignedUrl(client, command, { expiresIn: 36000 });
+        return url;
+    } catch {
+        throw new Error("File not found")
+        return '';
     }
 }
 
@@ -380,29 +431,50 @@ export const freeUpSpaceWhenExceeded = async (userId: string, cronAuth: string) 
 
     const userStorage = await getSubscriptionStorage(user.subscriptionType);
 
-    const todaysDate = new Date().getTime();
-    const subscriptionExpireDate = user.canceledSubscription;
-    const daysDifference = (todaysDate - subscriptionExpireDate) / (1000 * 3600 * 24);
+    if (user.mbsUploaded > userStorage.size) {
+        const allFiles = await getFilesFromAWS({
+            orgId: userId, 
+            query: undefined, 
+            favorites: undefined, 
+            deletedOnly: true, 
+            type: '', 
+            isCron: true
+        });
+        console.log("All files: ", allFiles)
 
-    if (daysDifference > 10) {
-        if (user.mbsUploaded > userStorage.size) {
-            const allFiles = await getFilesFromAWS({
-                orgId: userId, 
-                query: undefined, 
-                favorites: undefined, 
-                deletedOnly: false, 
-                type: '', 
-                isCron: true
-            });
-            console.log("All files: ", allFiles)
+        while (user.mbsUploaded > userStorage.size && allFiles.length > 0) {
+            // Get the biggest file of the allFiles array
+            const biggestFile = allFiles.reduce((prev, current) => (prev.fileSize > current.fileSize) ? prev : current);
 
-            while (user.mbsUploaded > userStorage.size && allFiles.length > 0) {
-                const biggestFile = allFiles.reduce((prev, current) => (prev.fileSize > current.fileSize) ? prev : current);
-        
-                await deleteFilePermanently(biggestFile.fileId, cronAuth);
-                user = await getUserById(userId);  // Update the user's uploaded MBs
-                allFiles.splice(allFiles.indexOf(biggestFile), 1);  // Remove the deleted file from the array
-            }
+            console.log("Deleting file: ", biggestFile.fileId)
+    
+            await deleteFilePermanently(biggestFile.fileId, cronAuth);
+            user = await getUserById(userId);  // Update the user's uploaded MBs
+            console.log("User used space: ", user.mbsUploaded)
+            allFiles.splice(allFiles.indexOf(biggestFile), 1);  // Remove the deleted file from the array
+        }
+    }
+
+    if (user.mbsUploaded > userStorage.size) {
+        const allFiles = await getFilesFromAWS({
+            orgId: userId, 
+            query: undefined, 
+            favorites: undefined, 
+            deletedOnly: false, 
+            type: '', 
+            isCron: true
+        });
+        console.log("All files: ", allFiles)
+
+        while (user.mbsUploaded > userStorage.size && allFiles.length > 0) {
+            const biggestFile = allFiles.reduce((prev, current) => (prev.fileSize > current.fileSize) ? prev : current);
+
+            console.log("Deleting file: ", biggestFile.fileId)
+    
+            await deleteFilePermanently(biggestFile.fileId, cronAuth);
+            user = await getUserById(userId);  // Update the user's uploaded MBs
+            console.log("User used space: ", user.mbsUploaded)
+            allFiles.splice(allFiles.indexOf(biggestFile), 1);  // Remove the deleted file from the array
         }
     }
 }
@@ -477,4 +549,73 @@ export const getFileTags = async (fileId: string) => {
     }
 
     return file.tags;
+}
+
+export const createShareLink = async (fileId: string, shareTime: number, encryptionKey: string, encryptionKeyMD5: string) => {
+    const access = await hasAccessToFile(fileId);
+
+    if (!access) {
+        throw new Error("Not authorized");
+    }
+
+    const file = await getSingleFile(fileId);
+
+    // Update file in db to disable isEncrypted
+    await docClient.send(new PutCommand({
+        TableName: 'vaultnet-files',
+        Item: {
+            ...file,
+            isEncrypted: false
+        }
+    }));
+
+    if (!file) {
+        throw new Error("File not found");
+    }
+
+    if (file.isEncrypted) {
+        // Copy the file
+        const copyParams = {
+            Bucket: "vaultnet",
+            CopySource: `vaultnet/${fileId}`,
+            Key: fileId,
+            CopySourceSSECustomerAlgorithm: encryptionKey && 'AES256',
+            CopySourceSSECustomerKey: encryptionKey && encryptionKey,
+            CopySourceSSECustomerKeyMD5: encryptionKeyMD5 && encryptionKeyMD5,
+        }
+
+        await s3Client.send(new CopyObjectCommand(copyParams))
+    }
+
+    const presignedUrl = await getSignedUrl(s3Client, new GetObjectCommand({
+        Bucket: "vaultnet",
+        Key: fileId,
+        }), { expiresIn: shareTime }); 
+
+    return presignedUrl
+}
+
+export const setShareLink = async (shareId: string, targetLink: string) => {
+    const command = new PutCommand({
+        TableName: 'vaultnet-links',
+        Item: {
+            id: shareId,
+            target: targetLink
+        }
+    });
+
+    const response = await docClient.send(command);
+}
+
+export const getShareLink = async (shareId: string) => {
+    const command = new GetCommand({
+        TableName: 'vaultnet-links',
+        Key: {
+            id: shareId
+        }
+    });
+    
+    const response = await docClient.send(command);
+    console.log(response);
+    return {targetLink: response.Item?.target, fileName: response.Item?.fileName};
 }

@@ -1,8 +1,10 @@
-import { addOrgIdToUser, createUser, deleteOrgIdFromUser, deleteUser, updateRoleInOrgForUser, updateUser } from "@/actions/aws/users";
+import { addOrgIdToUser, createEncryptionKeyForOrg, createUser, deleteOrgIdFromUser, deleteUser, updateRoleInOrgForUser, updateUser } from "@/actions/aws/users";
 import { WebhookEvent } from "@clerk/nextjs/server";
 
 export async function POST(req: Request) {
     const payload: WebhookEvent = await req.json();
+
+    console.log("This is the payload: ", payload)
 
     try {
         switch (payload.type) {
@@ -14,6 +16,7 @@ export async function POST(req: Request) {
                 break;
             case "organizationMembership.created":
                 await addOrgIdToUser(payload.data);
+                await createEncryptionKeyForOrg(payload.data);
                 break;
             case "organizationMembership.updated":
                 await updateRoleInOrgForUser(payload.data);
@@ -24,6 +27,9 @@ export async function POST(req: Request) {
             case "user.deleted":
                 await deleteUser(payload.data);
                 break;
+            // case "organization.created":
+            //     console.log("This is the data: ", payload.data)
+            //     break;
         }
     } catch (err) {
         console.error(err);

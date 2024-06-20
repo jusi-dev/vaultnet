@@ -1,5 +1,5 @@
 import { getMe, getSubscriptionStorage } from "@/actions/aws/users"
-import { set } from "date-fns"
+import { max, set } from "date-fns"
 import { useEffect, useState } from "react"
 
 export default function StorageUsage() {
@@ -29,6 +29,11 @@ export default function StorageUsage() {
         }
     }
 
+    const calcuateStorageUsageInPercentage = () => {
+        const percentage = (me.mbsUploaded / subscriptionSize) * 100
+        return percentage
+    }
+
     useEffect(() => {
         getUser()
     }, [])
@@ -50,6 +55,17 @@ export default function StorageUsage() {
                             <div className="flex flex-col gap-2">
                                 <h2 className="text-xl font-bold">Current Usage</h2>
                                 <p className="text-gray-500">You are currently using <span className="font-bold">{(me.mbsUploaded / (1024 * 1024)).toFixed(2)} MB</span> of storage from <span className="font-bold">{storageSize}.</span></p>
+                                {/* Row chart to display the current usage */}
+                                <div className="relative w-full h-8 bg-gray-400 rounded">
+                                    <div
+                                        className="absolute top-0 left-0 h-full bg-orange-500 rounded text-white font-extrabold flex items-center justify-center"
+                                        style={{ width: `${calcuateStorageUsageInPercentage()}%`, maxWidth: "100%" }}
+                                    ></div>
+                                    {/* Make sure text is visible on both sides (inside and outside the bar) */}
+                                    <div className="absolute w-full h-full flex items-center justify-center text-white font-extrabold">
+                                    {calcuateStorageUsageInPercentage().toFixed(2)}%
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

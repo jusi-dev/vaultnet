@@ -5,11 +5,10 @@ import type { Stripe } from "stripe";
 import { headers } from "next/headers";
 
 import { CURRENCY } from '@/config'
-import { formatAmountForStripe } from '@/utils/stripe-helpers'
-import { stripe } from '@/lib/stripe'
+// import { stripe } from '@/lib/stripe'
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 import { currentUser } from "@clerk/nextjs";
-import { getMe } from "../../convex/users";
-import { getSubscriptionStorage, getUserById, updateSubscription } from "./aws/users";
+import { cancelSubscription, disablePAYG, endPAYG, getSubscriptionStorage, getUserById, setPAYGIdentifier, updateSubscription } from "./aws/users";
 
 const getUserId = async () => {
   const user = await currentUser();
@@ -21,6 +20,17 @@ const getUserId = async () => {
   return user.id;
 }
 
+const priceIds = {
+  'Vault S': 'price_1PIcbMIugTClj0cpBP2vZMjC',
+  'Vault L': 'price_1PIcdgIugTClj0cptiNMHAt4',
+}
+
+const PAYGPriceId = {
+  "free": "price_1PGn8SIugTClj0cpYmzgpMop",
+  'Vault S': "price_1PGnGEIugTClj0cppcJ6nyRB",
+  "Vault L": "price_1PGn7CIugTClj0cpCMqhujsd"
+}
+
 export async function createCheckoutSession( data: FormData, subscriptionType: string ) : Promise<{ client_secret: string | null; url: string | null }> {
     const ui_mode = data.get(
       "uiMode",
@@ -28,7 +38,8 @@ export async function createCheckoutSession( data: FormData, subscriptionType: s
   
     const origin: string = headers().get("origin") as string;
 
-    const subscriptionDetails = await getSubscriptionStorage(subscriptionType)
+    const userId = await getUserId()
+    const user = await getUserById(userId)
   
     const checkoutSession: Stripe.Checkout.Session =
       await stripe.checkout.sessions.create({
@@ -37,34 +48,24 @@ export async function createCheckoutSession( data: FormData, subscriptionType: s
         mode: "subscription",
         metadata: {
           userId: await getUserId(),
+          subscriptionType: subscriptionType
         },
-        // submit_type: "pay",
+        customer: user.customerId ? `${user.customerId}` : undefined,
         line_items: [
           {
             quantity: 1,
-            price_data: {
-              currency: CURRENCY,
-              product_data: {
-                name: "VaultNet Subscription Plan: " + subscriptionType,
-              },
-              unit_amount: subscriptionDetails.price,
-              recurring: {
-                interval: "month",
-              },
-            },
+            price: priceIds[subscriptionType as keyof typeof priceIds],
           },
         ],
         subscription_data: {
           metadata: {
             userId: await getUserId(),
+            subscriptionType: subscriptionType
           }
         },
         ...(ui_mode === "hosted" && {
           success_url: `${origin}/subscriptions/success`,
-          cancel_url: `${origin}/donate-with-checkout`,
-        }),
-        ...(ui_mode === "embedded" && {
-          return_url: `${origin}/donate-with-embedded-checkout/result?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${origin}/subscriptions/failed`,
         }),
         ui_mode,
       });
@@ -73,37 +74,184 @@ export async function createCheckoutSession( data: FormData, subscriptionType: s
       client_secret: checkoutSession.client_secret,
       url: checkoutSession.url,
     };
+ }
+
+ export async function enablePAYGCheckout( data: FormData, subscriptionType: string ) : Promise<{ client_secret: string | null; url: string | null }> {
+  const ui_mode = data.get(
+    "uiMode",
+  ) as Stripe.Checkout.SessionCreateParams.UiMode;
+
+  const origin: string = headers().get("origin") as string;
+
+  const userId = await getUserId()
+  const user = await getUserById(userId)
+
+  const checkoutSession: Stripe.Checkout.Session =
+    await stripe.checkout.sessions.create({
+      billing_address_collection: "required",
+      mode: "subscription",
+      metadata: {
+        userId: await getUserId(),
+        payg: true,
+      },
+      customer: user.customerId ? `${user.customerId}` : undefined,
+      line_items: [
+        {
+          price: PAYGPriceId[user.subscriptionType as keyof typeof PAYGPriceId]
+        },
+      ],
+      subscription_data: {
+        metadata: {
+          userId: await getUserId(),
+          payg: true,
+        }
+      },
+      ...(ui_mode === "hosted" && {
+        success_url: `${origin}/dashboard/files`,
+        cancel_url: `${origin}/subscriptions/failed`,
+      }),
+      ui_mode,
+    });
+
+  return {
+    client_secret: checkoutSession.client_secret,
+    url: checkoutSession.url,
+  };
+}
+
+  const subscriptionIds = {
+    'Vault S': 'price_1PIcbMIugTClj0cpBP2vZMjC',
+    'Vault L': 'price_1PIcdgIugTClj0cptiNMHAt4',
   }
-  export const retriveSubID = async (userId: string) => {
+
+  export const retriveSubID = async (customerId: string, subscriptionType: string) => {
     const subscription = await stripe.subscriptions.list({
-      customer: userId,
+      customer: customerId,
     })
 
+    console.log("This is the subscription data ", subscription.data)
 
-    const user = subscription.data[0].metadata?.userId
-    const subscriptionId = subscription.data[0].id
-    const customerId = subscription.data[0].customer
+    // Get SubscriptionID of the subscriptionType or PAYG Subscription
 
-    return { user, subscriptionId, customerId }
-  }
-
-  export const changeSubscription = async (customerId: string, newSubscription: string) => {
-    const subscription = await retriveSubID(customerId)
-
-    const getNewSubscriptionStorage = await getSubscriptionStorage(newSubscription)
-    const user = await getUserById(subscription.user)
-
-    console.log("mbs uploaded: ", user.mbsUploaded)
-    console.log("new subscription size: ", getNewSubscriptionStorage.size)
-    console.log("Is bigger: ", user.mbsUploaded > getNewSubscriptionStorage.size)
-
-    // if (user.mbsUploaded > getNewSubscriptionStorage.size && !user.payAsYouGo) {
-    if (false) {
-      return { error: 'User has exceeded storage limit', subscriptionLimit: (getNewSubscriptionStorage.size / (1024 * 1024)).toFixed(2)}
+    if (subscriptionType === 'PAYG') {
+      for (const sub of subscription.data) {
+        if (sub.metadata?.payg === 'true') {
+          return { subscriptionId: sub.id, customerId: sub.customer, user: sub.metadata?.userId, current_period_start: sub.current_period_start }
+        }
+      }
     } else {
-      await updateSubscription(subscription.user, subscription.customerId as string, newSubscription, true)
-      const status = await stripe.subscriptions.cancel(subscription.subscriptionId)
-      return {status}
+      for (const sub of subscription.data) {
+        if (sub.metadata?.subscriptionType === subscriptionType) {
+          return { subscriptionId: sub.id, customerId: sub.customer, user: sub.metadata?.userId }
+        }
+      }
     }
 
+    throw new Error('Subscription not found')
   }
+
+export const changeSubscription = async (customerId: string, currentSubscription: string) => {
+    const subscription = await retriveSubID(customerId, currentSubscription)
+
+    const status = await stripe.subscriptions.update(subscription.subscriptionId, {
+      cancel_at_period_end: true,
+    });
+
+    if (currentSubscription === 'PAYG') {
+      await endPAYG(subscription.user, status.current_period_end)
+    } else {
+      await cancelSubscription(subscription.user, status.current_period_end)
+    }
+
+    return {status}
+  }
+
+const getStartOfCurrentSubscription = async (customerId: string, priceId: string) => {
+  try {
+    const subscription = await stripe.subscriptions.list({
+      customer: customerId,
+      price: priceId
+    })
+
+    console.log("Funny output", subscription.data[0].current_period_start)
+
+    return subscription.data[0].current_period_start;
+  } catch (err) {
+    return;
+  }
+}
+
+const getMeterUsage = async (customerId: string, subscriptionTime: string) => {
+  try {
+
+  const meterEventSummaries = await stripe.billing.meters.listEventSummaries(
+    `mtr_test_61QQ1aUJ1J8CCX7Nr41IugTClj0cpE4O`,
+    {
+      customer: customerId,
+      start_time: subscriptionTime,
+      end_time: parseInt(subscriptionTime) + 1000,
+    }
+  );
+
+  console.log("This is the usage: ", meterEventSummaries.data[0].aggregated_value)
+  return meterEventSummaries.data[0].aggregated_value;
+  } catch (err) {
+    return 0;
+  }
+}
+
+export const addToPAYG = async (customerId: string, mbs: string, userId: string) => {
+  const subscription = await retriveSubID(customerId, 'PAYG')
+  const userUsage = await getMeterUsage(customerId, subscription.current_period_start)
+
+  const user = await getUserById(userId)
+
+  console.log("This is the PAYG identifier", user.PAYGidentifier)
+
+  if (userUsage <= parseInt(mbs) / 1024 / 1024 || !userUsage) {
+
+    console.log("Running this part of code!")
+    try {
+      const meterEventAdjustment = await stripe.billing.meterEventAdjustments.create({
+        cancel: {
+          identifier: user.PAYGidentifier,
+        },
+        event_name: 'storage-pay_as_you_go',
+        type: 'cancel',
+      });
+    } catch (err) {
+      console.log(err)
+    }
+
+    console.log("Running this part of code PART 2!")
+    console.log("This is the overused usage: ", mbs)
+    console.log("This is the new usage to set: ", (parseInt(mbs) / 1024 / 1024).toFixed(0).toString())
+    const createMeterEvent = await stripe.billing.meterEvents.create({
+      event_name: 'storage-pay_as_you_go',
+      payload: {
+        value: ((parseInt(mbs) / 1024 / 1024).toFixed(0)).toString(),
+        stripe_customer_id: customerId,
+        action: 'set',
+      },
+      timestamp: subscription.current_period_start || 0
+    })
+
+    await setPAYGIdentifier(createMeterEvent.identifier, userId)
+  }
+}
+
+export const cancelPAYG = async (userId: string) => {
+  const user = await getUserById(userId)
+
+  if (user.PAYGidentifier) {
+    const meterEventAdjustment = await stripe.billing.meterEventAdjustments.create({
+      cancel: {
+        identifier: user.PAYGidentifier,
+      },
+      event_name: 'storage-pay_as_you_go',
+      type: 'cancel',
+    });
+  }
+
+  await disablePAYG(userId)
+}

@@ -5,8 +5,8 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 
 import { currentUser } from "@clerk/nextjs";
-import { updateSubscription } from "@/actions/aws/users";
-import { retriveSubID } from "@/actions/stripe";
+import { calculateOverusedSpace, disablePAYG, enablePAYG, getUserById, resetPAYGUsage, transferPAYGUsage, updateSubscription } from "@/actions/aws/users";
+import { addToPAYG, cancelPAYG } from "@/actions/stripe";
 
 export async function POST(req: Request) {
   let event: Stripe.Event;
@@ -37,6 +37,8 @@ export async function POST(req: Request) {
     "checkout.session.completed",
     "payment_intent.succeeded",
     "payment_intent.payment_failed",
+    "customer.subscription.deleted",
+    "customer.subscription.updated"
   ];
 
   if (permittedEvents.includes(event.type)) {
@@ -47,6 +49,13 @@ export async function POST(req: Request) {
         case "checkout.session.completed":
           data = event.data.object as Stripe.Checkout.Session;
           console.log(`💰 CheckoutSession status: ${data.payment_status}`);
+          console.log(data)
+
+          if(data?.metadata?.payg === "true") {
+            await enablePAYG(data?.metadata?.userId, data.customer as string, data.created, data.expires_at)
+          } else {
+            await updateSubscription(data?.metadata?.userId, data.customer as string, data?.metadata?.subscriptionType as string, data.expires_at)
+          }
           break;
         case "payment_intent.payment_failed":
           data = event.data.object as Stripe.PaymentIntent;
@@ -54,12 +63,49 @@ export async function POST(req: Request) {
           break;
         case "payment_intent.succeeded":
           data = event.data.object as Stripe.PaymentIntent;
-          console.log(event)
-          // console.log(`💰 PaymentIntent status: ${data.status}`);
-          console.log('This is the user: ', data.metadata.userId)
-          const subscription = await retriveSubID(data.customer as string)
-          await updateSubscription(subscription.user, subscription.customerId as string, "premium");
           break;
+        case "customer.subscription.deleted":
+          console.log("Running subscription deleted")
+          data = event.data.object as Stripe.Subscription;
+
+          if(data?.metadata?.payg === "true") {
+            await disablePAYG(data?.metadata?.userId)
+          } else {
+            await updateSubscription(data?.metadata?.userId, data.customer as string, "free", data.current_period_end, true)
+            // await cancelPAYG(data?.metadata?.userId)
+          }
+
+          break;
+        
+        case "customer.subscription.updated":
+          console.log("Running subscription updated")
+          data = event.data.object as Stripe.Subscription;
+
+          const user = await getUserById(data?.metadata?.userId)
+
+          if (data?.cancel_at_period_end === true) {
+            return;
+          }
+
+          // Check if subscription is renewed
+          if (!data?.metadata?.payg) {
+            await updateSubscription(data?.metadata?.userId, data.customer as string, data?.metadata?.subscriptionType as string, data.current_period_end)
+          }
+
+          if(user.PAYGStart < data.current_period_start) {
+
+            // TODO: Update PAYGStart and other start
+            if(data?.metadata?.payg === "true") {
+              await resetPAYGUsage(data?.metadata?.userId)
+
+              const overusedSpace = await calculateOverusedSpace(user)
+
+              await addToPAYG(data.customer as string, overusedSpace.toString(), user.userid)
+              await transferPAYGUsage(user, overusedSpace)
+            }
+          }
+          break;
+
         default:
           throw new Error(`Unhandled event: ${event.type}`);
       }

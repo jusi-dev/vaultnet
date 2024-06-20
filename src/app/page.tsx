@@ -259,22 +259,64 @@ export default function Home() {
           <p className="text-center text-gray-600 text-2xl mt-4">And there are still many more to explore!</p>
           <div className="text-center flex flex-col md:flex-row items-center justify-center mt-12 md:mt-24 gap-20 gap-y-12">
             <div className="flex flex-col items-center md:w-[30%]">
-              <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Up to</p>
-              <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">99.999999999%</p>
-              <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">durability</p>
-              <p className="mt-2 text-center">Unlock Unparalleled Endurance — Experience our 9-Nine Durability Standard that promises virtually perfect persistence, ensuring your data withstands the test of time with unwavering resilience.</p>
+              <div className="h-28">
+                <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Up to</p>
+                <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">99.999999999%</p>
+                <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">durability</p>
+              </div>
+              <p className="mt-2 text-center h-20">Unlock Unparalleled Endurance — Experience our 9-Nine Durability Standard that promises virtually perfect persistence, ensuring your data withstands the test of time with unwavering resilience.</p>
             </div>
             <div className="flex flex-col items-center md:w-[33%]">
-              <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">All files are stored</p>
-              <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">within Switzerland</p>
-              <p className="text-lg text-white font-semibold">.</p>
-              <p className="mt-2 text-center">Swiss Sanctuary for Data — Benefit from the robust privacy laws and meticulous attention to detail with our exclusive Swiss storage solutions. Your data is not just stored; it’s fortified in the heart of Switzerland.</p>
+              <div className="h-28">
+                <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Easily</p>
+                <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">collaborate</p>
+                <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">with your team</p>
+              </div>
+              <p className="mt-2 text-center h-20">Effortless Synergy — Collaborate with your team like never before. Share and edit files securely in real-time, ensuring everyone stays on the same page without compromising on privacy.</p>
             </div>
             <div className="flex flex-col items-center md:w-[30%]">
-              <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Save money with the</p>
-              <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">Pay-As-You-Go</p>
-              <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">hybrid pricing model.</p>
-              <p className="mt-2 text-center">Economize Without Compromise — Embrace our Hybrid Pay-As-You-Go Model for a tailor-made pricing strategy that adapts to your usage. Spend less, save more, and enjoy the elasticity that your finances will thank you for.</p>
+              <div className="h-28">
+                <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Save money with the</p>
+                <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">Pay-As-You-Go</p>
+                <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">hybrid pricing model.</p>
+              </div>
+              <p className="mt-2 text-center h-20">Economize Without Compromise — Embrace our Hybrid Pay-As-You-Go Model for a tailor-made pricing strategy that adapts to your usage. Spend less, save more, and enjoy the elasticity that your finances will thank you for.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div className="container flex flex-col items-center w-full mt-32 md:mt-60">
+        <div className="w-full">
+          <h2 className="text-5xl md:text-5xl text-gray-800 text-center font-extrabold">
+            Your Privacy <br/>Our responsibilities
+          </h2>
+          <p className="text-center text-gray-600 text-2xl mt-4">Why your data is in the best hands</p>
+          <div className="text-center flex flex-col md:flex-row items-center justify-center mt-12 md:mt-24 gap-20 gap-y-12">
+            <div className="flex flex-col items-center md:w-[30%]">
+              <div className="h-28">
+                <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">State of Art</p>
+                <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">Protection</p>
+                <p className="text-lg text-white font-semibold">.</p>
+              </div>
+              <p className="mt-2 text-center h-20">Cutting-Edge Security — Your files are encrypted using industry-leading standards, with each user receiving a unique encryption key. Leveraging the SHA256 encryption to encrypt your files in-transit and at rest.</p>
+            </div>
+            <div className="flex flex-col items-center md:w-[33%]">
+              <div className="h-28">
+                <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">All files are stored</p>
+                <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">within Switzerland</p>
+                <p className="text-lg text-white font-semibold">.</p>
+              </div>
+              <p className="mt-2 text-center h-20 block">Swiss Sanctuary for Data — Benefit from the robust privacy laws and meticulous attention to detail with our exclusive Swiss storage solutions. Your data is not just stored; it’s fortified in the heart of Switzerland.</p>
+            </div>
+            <div className="flex flex-col items-center md:w-[33%]">
+              <div className="h-28">
+                <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Encrypt your files with</p>
+                <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">End-To-End</p>
+                <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">encryption</p>
+              </div>
+              <p className="mt-2 text-center h-20">Unyielding Privacy - Encrypt single files with an end-to-end encryption, to securely encrypt on your device before they are sent to us and remain encrypted throughout their journey. Only you hold the decryption key, ensuring that even we cannot access your data.</p>
             </div>
           </div>
         </div>
@@ -374,6 +416,46 @@ export default function Home() {
               <Accordion type="single" collapsible className="md:w-[35vw]">
                 <AccordionItem value="item-1">
                   <AccordionTrigger className="text-lg font-semibold md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
+                    What is VaultNet?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-lg md:text-xl text-gray-600">
+                    VaultNet is a state-of-the-art platform providing secure and encrypted cloud storage solutions. We offer robust data protection, 
+                    ensuring your files and information are stored safely and remain accessible only to you.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-2">
+                  <AccordionTrigger className="text-lg font-semibold md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
+                    How do I sign up for VaultNet?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-lg md:text-xl text-gray-600">
+                    Signing up is easy. Click on the "Sign Up" button on our homepage, fill in the required details, 
+                    and follow the instructions sent to your email to activate your account.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-3">
+                  <AccordionTrigger className="text-lg font-semibold md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
+                    How does VaultNet ensure my data is secure?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-lg md:text-xl text-gray-600">
+                    We employ industry-leading encryption techniques to protect your data. All files are encrypted both in transit 
+                    and at rest using AES-256 encryption. Additionally, our platform supports multi-factor authentication to add an extra layer of security to your account.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-4">
+                  <AccordionTrigger className="text-lg font-semibold md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
+                    What is end-to-end encryption?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-lg md:text-xl text-gray-600">
+                    End-to-end encryption means your data is encrypted on your device and only decrypted by the intended recipient. 
+                    This ensures that no one else, not even VaultNet, can access your data.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-5">
+                  <AccordionTrigger className="text-lg font-semibold md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
                     Can I share files with non-users or people outside
                     Switzerland?
                   </AccordionTrigger>
@@ -384,7 +466,7 @@ export default function Home() {
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="item-2">
+                <AccordionItem value="item-6">
                   <AccordionTrigger className="text-lg font-semibold md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
                     Is there a limit to the file size or storage capacity?
                   </AccordionTrigger>
@@ -394,7 +476,7 @@ export default function Home() {
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="item-3">
+                <AccordionItem value="item-7">
                   <AccordionTrigger className="text-lg font-semibold md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
                     Do you offer any trial periods or money-back guarantees?
                   </AccordionTrigger>
@@ -405,19 +487,19 @@ export default function Home() {
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="item-4">
+                <AccordionItem value="item-8">
                   <AccordionTrigger className="text-lg font-semibold md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
                     What happens to my data if I decide to cancel my
                     subscription?
                   </AccordionTrigger>
                   <AccordionContent className="text-lg md:text-xl text-gray-600">
                     If you decide to cancel your subscription, you can still
-                    access your files for 30 days. After that, your files will
+                    access your files for 10 days. After that, your files will
                     be deleted.
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="item-5">
+                <AccordionItem value="item-9">
                   <AccordionTrigger className="text-lg font-semibold md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
                     How can I access my files?
                   </AccordionTrigger>
@@ -427,31 +509,31 @@ export default function Home() {
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="item-6">
+                <AccordionItem value="item-10">
                   <AccordionTrigger className="text-lg font-semibold md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
                     What are the pricing plans available?
                   </AccordionTrigger>
                   <AccordionContent className="text-lg md:text-xl text-gray-600">
                     See all pricing plans{" "}
-                    <span className="text-orange-500 underline cursor-pointer">
-                      here.
-                    </span>
+                    <a href="/subscriptions" className="text-orange-500 underline cursor-pointer">
+                      here
+                    </a>
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="item-7">
+                <AccordionItem value="item-11">
                   <AccordionTrigger className="text-lg font-semibold md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
                     How do the additional GB work?
                   </AccordionTrigger>
                   <AccordionContent className="text-lg md:text-xl text-gray-600">
-                    If you want to use more storage in your current plan, you
-                    can easily add additional GB to your plan. Either you
-                    pre-pay the additional GB in advance, or they are billed
-                    automatically at the end of the month.
+                    With VaultNet's pay-as-you-go pricing model, you have the flexibility to exceed your subscribed storage capacity without any disruption. 
+                    When your data usage surpasses your subscription's allocated storage, you will be automatically billed for each additional 10GB increment. 
+                    This approach ensures you can scale your storage seamlessly to meet your needs while only paying for the extra space you use. 
+                    Keep in mind that we will never charge you if you don't have pay-as-you-go activated.
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="item-8">
+                <AccordionItem value="item-12">
                   <AccordionTrigger className="text-lg font-semibold md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
                     I need a custom plan for my company
                   </AccordionTrigger>
@@ -459,6 +541,19 @@ export default function Home() {
                     If you need a custom plan for your company, please contact
                     our support team at support@vaultnet.ch. We will find the
                     best solution for you.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-13">
+                  <AccordionTrigger className="text-lg font-semibold md:text-2xl text-gray-700 [&[data-state=open]]:text-orange-500 text-left">
+                    Can I white-label VaultNet for my company?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-lg md:text-xl text-gray-600">
+                    Yes, VaultNet offers white-label solutions that allow you to brand our platform as your own. By white-labeling VaultNet, 
+                    you can customize the interface with your company’s logo, colors, and branding elements, creating a seamless experience for 
+                    your clients and employees. This service is ideal for businesses looking to provide secure cloud storage under their own brand while 
+                    leveraging VaultNet's robust security and functionality. For more details on our white-labeling options and how to get started, 
+                    please contact our sales team at <a href="mailto: name@email.com" className="text-orange-500">sales@vaultnet.ch</a>.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
