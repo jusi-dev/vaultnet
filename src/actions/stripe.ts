@@ -21,14 +21,14 @@ const getUserId = async () => {
 }
 
 const priceIds = {
-  'Vault S': 'price_1PIcbMIugTClj0cpBP2vZMjC',
-  'Vault L': 'price_1PIcdgIugTClj0cptiNMHAt4',
+  'Vault S': process.env.STRIPE_VAULT_S_SUB,
+  'Vault L': process.env.STRIPE_VAULT_L_SUB,
 }
 
 const PAYGPriceId = {
-  "free": "price_1PGn8SIugTClj0cpYmzgpMop",
-  'Vault S': "price_1PGnGEIugTClj0cppcJ6nyRB",
-  "Vault L": "price_1PGn7CIugTClj0cpCMqhujsd"
+  "free": process.env.STRIPE_PAYG_FREE,
+  'Vault S': process.env.STRIPE_PAYG_S,
+  "Vault L": process.env.STRIPE_PAYG_L,
 }
 
 export async function createCheckoutSession( data: FormData, subscriptionType: string ) : Promise<{ client_secret: string | null; url: string | null }> {
