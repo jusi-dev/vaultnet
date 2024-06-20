@@ -362,14 +362,24 @@ export const createPresignedUploadUrl = async (orgId: string, fileData: any, enc
     }
 
     try {
-        const command = new PutObjectCommand({
-            Bucket: "vaultnet",
-            Key: fileKey,
-            ContentType: fileType as string,
-            SSECustomerAlgorithm: encryptionKey && "AES256",
-            SSECustomerKey: encryptionKey && encryptionKey,
-            SSECustomerKeyMD5: encryptionKeyMD5 && encryptionKeyMD5,
-        });
+        let command;
+
+        if (encryptionKey) {
+            command = new PutObjectCommand({
+                Bucket: "vaultnet",
+                Key: fileKey,
+                ContentType: fileType as string,
+                SSECustomerAlgorithm: encryptionKey && "AES256",
+                SSECustomerKey: encryptionKey && encryptionKey,
+                SSECustomerKeyMD5: encryptionKeyMD5 && encryptionKeyMD5,
+            });
+        } else {
+            command = new PutObjectCommand({
+                Bucket: "vaultnet",
+                Key: fileKey,
+                ContentType: fileType as string,
+            });
+        }
 
         const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
 
@@ -392,14 +402,23 @@ export const createPresignedDownloadUrl = async (fileId: string, user: any) => {
     const userEncryptionKeyMD5 = user.user?.publicMetadata?.encryptionKeyMD5Base64 as string;
 
     try {
+        let command;
 
-        const command = new GetObjectCommand({ 
-        Bucket: "vaultnet", 
-        Key: fileId,
-        SSECustomerAlgorithm: userEncryptionKey && "AES256",
-        SSECustomerKey: userEncryptionKey && userEncryptionKey,
-        SSECustomerKeyMD5: userEncryptionKeyMD5 && userEncryptionKeyMD5,
-        });
+        if (userEncryptionKey) {
+            command = new GetObjectCommand({ 
+                Bucket: "vaultnet", 
+                Key: fileId,
+                SSECustomerAlgorithm: userEncryptionKey && "AES256",
+                SSECustomerKey: userEncryptionKey && userEncryptionKey,
+                SSECustomerKeyMD5: userEncryptionKeyMD5 && userEncryptionKeyMD5,
+            });
+        } else {
+            command = new GetObjectCommand({ 
+                Bucket: "vaultnet", 
+                Key: fileId,
+            });
+        }
+
         const url = await getSignedUrl(client, command, { expiresIn: 36000 });
         return url;
     } catch {
