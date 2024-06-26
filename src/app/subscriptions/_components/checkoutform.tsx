@@ -13,6 +13,7 @@ import {
   EmbeddedCheckoutProvider,
 } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
+import { useUser } from "@clerk/nextjs";
 
 interface CheckoutFormProps {
   uiMode: Stripe.Checkout.SessionCreateParams.UiMode;
@@ -21,9 +22,9 @@ interface CheckoutFormProps {
 
 export default function CheckoutForm(props: CheckoutFormProps): JSX.Element {
 
-  const [loading] = useState<boolean>(false);
-  const [input, setInput] = useState<{ customDonation: number }>({customDonation: 10});
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  
+  const user = useUser();
 
   const formAction = async (data: FormData): Promise<void> => {
     const uiMode = data.get(
@@ -34,7 +35,13 @@ export default function CheckoutForm(props: CheckoutFormProps): JSX.Element {
 
     if (uiMode === "embedded") return setClientSecret(client_secret);
 
-    window.location.assign(url as string);
+    if (user) {
+      window.location.assign(`https://accounts.vaultnet.ch/sign-up?redirect_url=${url}`);
+    } else {
+      window.location.assign(url as string);
+    }
+
+
   };
 
   return (

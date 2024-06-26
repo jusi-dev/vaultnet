@@ -76,10 +76,10 @@ export function Header() {
                     }
 
                     <div className="hidden md:flex gap-x-6 justify-center items-center">
-                        <Link href={"/subscriptions"} className="text-center flex items-center text-gray-600 gap-2 font-semibold text-lg cursor-pointer hover:text-orange-500">
+                        <Link href={"/about"} className="text-center flex items-center text-gray-600 gap-2 font-semibold text-lg cursor-pointer hover:text-orange-500">
                             About
                         </Link>
-                        <Link href={"/subscriptions"} className="text-center flex items-center text-gray-600 gap-2 font-semibold text-lg cursor-pointer hover:text-orange-500">
+                        <Link href={"/contact"} className="text-center flex items-center text-gray-600 gap-2 font-semibold text-lg cursor-pointer hover:text-orange-500">
                             Contact
                         </Link>
                         <Link href={"/subscriptions"} className="text-center flex items-center whitespace-nowrap text-gray-600 gap-2 font-semibold text-lg cursor-pointer hover:text-orange-500">

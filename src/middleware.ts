@@ -13,6 +13,8 @@ export default authMiddleware({
       "/privacy",
       "/tos",
       "/about",
+      "/contact",
+      "/about",
     ],
 });
  

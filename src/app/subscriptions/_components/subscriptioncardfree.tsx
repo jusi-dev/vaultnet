@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import Link from "next/link";
 
 export default function SubscriptionCardFree() {
 
@@ -15,16 +16,18 @@ export default function SubscriptionCardFree() {
                     <p className="text-xl text-gray-500 ml-3 mt-2">forever</p>
                 </div>
             </div>
-            <div className="flex flex-col w-full mt-10">
+            <div className="flex flex-col w-full mt-10 h-20">
                 <ul className="md:font-semibold">
                 <li className="flex"><Check className="flex-shrink-0"/> 50MB of Storage</li>
                 <li className="flex"><Check className="flex-shrink-0"/> Up to 5 members in a single organization</li>
-                <li className="flex"><Check className="flex-shrink-0"/> + CHF 2 per additional 10 GB </li>
+                <li className="flex"><Check className="flex-shrink-0"/> + CHF 1.50 per additional 10 GB </li>
                 </ul>
             </div>
             <div className="mt-10">
-                <Button variant="orange" className="text-2xl w-full hover:cursor-not-allowed" size={"landing"}>Currently not available</Button>
-                <p className="text-center font-extralight mt-1">Recurring monthly costs</p>
+                <Link href="https://accounts.vaultnet.ch/sign-up">
+                    <Button variant="orange" className="text-2xl w-full hover:cursor-pointer" size={"landing"}>Start Now</Button>
+                </Link>
+                <p className="text-center font-extralight mt-1">No recurring monthly costs</p>
             </div>
         </div>
     )

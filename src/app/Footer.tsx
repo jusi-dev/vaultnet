@@ -16,7 +16,7 @@ export function Footer() {
             <div className="flex flex-col">
                 <p className="font-semibold text-xl mb-4">Service</p>
                 <Link className="cursor-pointer" href="/subscriptions">Subscriptions</Link>
-                <Link className="cursor-pointer" href="#faq">FAQ</Link>
+                <Link className="cursor-pointer" href="/#faq">FAQ</Link>
             </div>
             <div className="flex flex-col">
                 <p className="font-semibold text-xl mb-4">Company</p>

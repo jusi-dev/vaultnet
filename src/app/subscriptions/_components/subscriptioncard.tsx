@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import CheckoutForm from "./checkoutform";
 
-export default function SubscriptionCard({ subscription, price, shortDesc, topChoice, subPerks } : { subscription: string, price: number, shortDesc: string, topChoice?: boolean, subPerks?: any}) {
+export default function SubscriptionCard({ subscription, price, shortDesc, topChoice, subPerks, orgPrice } : { subscription: string, price: number, shortDesc: string, topChoice?: boolean, subPerks?: any, orgPrice: string}) {
 
     const { storageSize, members, additionalStoragePrice } = subPerks;
 
@@ -21,12 +21,12 @@ export default function SubscriptionCard({ subscription, price, shortDesc, topCh
                     <p className="text-center text-gray-500">{shortDesc}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-y-1">
-                    <p className="font-normal line-through text-gray-500 text-xl">CHF {price * 2 / 100}</p>
+                    <p className="font-normal line-through text-gray-500 text-xl">CHF {orgPrice}</p>
                     <p className="text-3xl font-bold ml-3">CHF {price / 100}</p>
                     <p className="text-xl text-gray-500 md:ml-3 md:mt-2">per month</p>
                 </div>
             </div>
-            <div className="flex flex-col w-full mt-10">
+            <div className="flex flex-col w-full mt-10 h-20">
                 <ul className="md:font-semibold">
                 <li className="flex"><Check className="flex-shrink-0"/> {storageSize}GB of Storage</li>
                 <li className="flex"><Check className="flex-shrink-0"/> {members} members in a single organization</li>

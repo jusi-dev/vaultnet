@@ -260,9 +260,9 @@ export default function Home() {
           <div className="text-center flex flex-col md:flex-row items-center justify-center mt-12 md:mt-24 gap-20 gap-y-12">
             <div className="flex flex-col items-center md:w-[30%]">
               <div className="h-28">
-                <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Up to</p>
-                <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">99.999999999%</p>
-                <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">durability</p>
+                <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Experience unmatched</p>
+                <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">Durability</p>
+                <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">for ultimate reliability</p>
               </div>
               <p className="mt-2 text-center h-20">Unlock Unparalleled Endurance — Experience our 9-Nine Durability Standard that promises virtually perfect persistence, ensuring your data withstands the test of time with unwavering resilience.</p>
             </div>
@@ -327,10 +327,10 @@ export default function Home() {
         <div className=" container flex flex-col items-center mt-32">
           <div>
             <div>
-              <div className="p-2 bg-lime-500 items-center rounded-3xl w-80 mx-auto">
+              <div className="p-2 bg-yellow-500 items-center rounded-3xl w-80 mx-auto">
                 {" "}
-                <p className="text-center text-gray-50 text-xs md:text-md">
-                  🌷 Spring Sale - 50% OFF 🌷
+                <p className="text-center text-gray-50 text-md md:text-lg">
+                  ☀️ Summer Sale - UP TO 35% OFF ☀️
                 </p>
               </div>
               <h2 className="text-3xl md:text-5xl text-gray-800 text-center mt-10 font-extrabold">
@@ -353,8 +353,9 @@ export default function Home() {
                 subPerks={{
                   storageSize: 250,
                   members: "Unlimited",
-                  additionalStoragePrice: 1,
+                  additionalStoragePrice: 0.50,
                 }}
+                orgPrice="20"
               />
               <SubscriptionCard
                 subscription="Vault S"
@@ -364,8 +365,9 @@ export default function Home() {
                 subPerks={{
                   storageSize: 200,
                   members: "Up to 5",
-                  additionalStoragePrice: 1.5,
+                  additionalStoragePrice: 1,
                 }}
+                orgPrice="15"
               />
             </div>
           </div>
