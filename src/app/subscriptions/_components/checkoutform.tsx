@@ -35,11 +35,7 @@ export default function CheckoutForm(props: CheckoutFormProps): JSX.Element {
 
     if (uiMode === "embedded") return setClientSecret(client_secret);
 
-    if (user) {
-      window.location.assign(`https://accounts.vaultnet.ch/sign-up?redirect_url=${url}`);
-    } else {
-      window.location.assign(url as string);
-    }
+    window.location.assign(url as string);
 
 
   };
