@@ -39,38 +39,46 @@ export function Header() {
 
                         <div className={`w-screen flex flex-col lg:hidden justify-center bg-gray-100 py-6 gap-y-8 mt-4 z-50 origin-top transition-all ease-in-out`}>
                             <div className="flex flex-col mx-auto gap-6 items-center justify-center">
-                                <Link href={"/subscriptions"} className="flex items-center text-gray-600 gap-2 font-semibold underline underline-offset-2 text-lg cursor-pointer hover:text-orange-500">
-                                    Subscriptions
+                                <Link href={"/about"} className="flex items-center text-gray-600 gap-2 font-semibold text-lg cursor-pointer hover:text-orange-500">
+                                    About
                                 </Link>
-                                <Button variant={"orange"} className="mx-20">
-                                    <Link href="/dashboard/files">Your Files</Link>
-                                </Button>
-                                <OrganizationSwitcher />
-                                <UserButton 
-                                    afterSignOutUrl="/"
-                                    showName={true}
-                                >
-                                    <UserButton.UserProfilePage
-                                        label="Subscription"
-                                        labelIcon={<Wallet className="w-4 h-4 justify-center items-center flex"/>}
-                                        url="/dashboard/subscription"
-                                    >
-                                        <SubscriptionOverview />
-                                    </UserButton.UserProfilePage>
-                                    <UserButton.UserProfilePage
-                                        label="Usage"
-                                        labelIcon={<Database className="w-4 h-4 justify-center items-center flex"/>}
-                                        url="/dashboard/usage"
-                                    >
-                                        <StorageUsage />
-                                    </UserButton.UserProfilePage>
-                                </UserButton>
+                                <Link href={"/contact"} className="flex items-center text-gray-600 gap-2 font-semibold text-lg cursor-pointer hover:text-orange-500">
+                                    Contact
+                                </Link>
+                                <Link href={"/subscriptions"} className="flex items-center text-gray-600 gap-2 font-semibold text-lg cursor-pointer hover:text-orange-500">
+                                    Pricing
+                                </Link>
+                                <SignedIn>
+                                    <Button variant={"orange"} className="mx-20">
+                                        <Link href="/dashboard/files">Your Files</Link>
+                                    </Button>
+                                    <OrganizationSwitcher />
+                                    <UserButton 
+                                        afterSignOutUrl="/"
+                                        showName={true}
+                                        >
+                                        <UserButton.UserProfilePage
+                                            label="Subscription"
+                                            labelIcon={<Wallet className="w-4 h-4 justify-center items-center flex"/>}
+                                            url="/dashboard/subscription"
+                                            >
+                                            <SubscriptionOverview />
+                                        </UserButton.UserProfilePage>
+                                        <UserButton.UserProfilePage
+                                            label="Usage"
+                                            labelIcon={<Database className="w-4 h-4 justify-center items-center flex"/>}
+                                            url="/dashboard/usage"
+                                            >
+                                            <StorageUsage />
+                                        </UserButton.UserProfilePage>
+                                    </UserButton>
+                                </SignedIn>
                                 <SignedOut>
                                     <SignInButton
                                         mode="modal"
                                         redirectUrl="/dashboard/files"
                                     >
-                                        <Button>Sign In</Button>
+                                        <Button variant={"orange"}>Sign In</Button>
                                     </SignInButton>
                                 </SignedOut>
                             </div>
