@@ -80,7 +80,7 @@ export function FileCard({ file, user }: {file: any & {isFavorited: boolean}, us
       } as Record<Doc<"files">["type"], ReactNode>
 
     return (
-        <Card className="w-[75%] md:w-full">
+        <Card className="md:w-full">
             <CardHeader className="relative flex">
                 <CardTitle className="flex gap-2 text-gray-700 font-normal">
                     <div className="flex justify-center">{typeIcons[file.type as keyof typeof typeIcons]}</div>
