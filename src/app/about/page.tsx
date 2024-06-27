@@ -1,6 +1,6 @@
 export default function TermsOfService() {
     return(
-        <div className="container md:w-2/4 my-20">
+        <div className="container md:w-2/4 my-32">
             <h2 className="mt-10 text-5xl text-orange-500">About Us</h2>
             <p className="mt-6">Welcome to VaultNet, your premier destination for secure, scalable, and Swiss-based cloud storage. Our mission is to revolutionize how individuals and businesses manage their digital assets with an uncompromising focus on security, privacy, and cost-efficiency.</p>
 

@@ -165,7 +165,7 @@ export function FileBrowser({ title, filterFavorites, deletedOnly }: { title: st
             <TabsContent value="grid">
               <div className="grid md:grid-cols-3 gap-4">
                 {modifiedFiles?.map((file) => {
-                  return <FileCard key={file.fileId} file={file} user={orgOrUser}/>;
+                  return <FileCard key={file.fileId} file={file} user={orgOrUser} />;
                 })}
               </div>
             </TabsContent>

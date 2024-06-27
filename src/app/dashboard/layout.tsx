@@ -16,7 +16,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="container mx-auto pt-12 min-h-[75vh]">
+    <main className="container mx-auto my-32 min-h-[75vh]">
       <div className="flex flex-col md:flex-row gap-8">
         <SideNav />
 

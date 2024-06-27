@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function DonatePage(): JSX.Element {
   return (
-    <div className="container flex flex-col w-full items-center justify-center mx-auto my-20">
+    <div className="container flex flex-col w-full items-center justify-center mx-auto my-32">
       <div className="p-2 bg-yellow-500 items-center rounded-3xl w-80 mx-auto mb-10">
         {" "}
         <p className="text-center text-gray-50 text-md md:text-lg">

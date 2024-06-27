@@ -32,7 +32,7 @@ export default function Home() {
         <BackgroundDrop />
         {/* Hero Section */}
         <div className="flex items-center py-10 w-screen mx-auto z-20">
-          <div className="flex flex-col items-center w-full overflow-x-hidden md:h-screen md:mt-16 gap-y-10 mx-6 md:mx-10 lg:mx-0">
+          <div className="flex flex-col items-center justify-center w-full overflow-x-hidden h-screen md:h-screen md:mt-16 gap-y-10 mx-6 md:mx-10 lg:mx-0">
             <div className="bg-white rounded-full p-10 drop-shadow-xl md:w-[17vw] w-[50vw]">
               <Image
                 src="/logo-faultnet.png"
