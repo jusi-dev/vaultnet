@@ -34,8 +34,10 @@ export function Header() {
                         </div>
                     </div>
 
+                    {/* Mobile Nav */}
                     {isOpen &&
-                        <div className="w-screen flex flex-col justify-center bg-gray-100 py-6 gap-y-8 mt-4">
+
+                        <div className={`w-screen flex flex-col lg:hidden justify-center bg-gray-100 py-6 gap-y-8 mt-4 z-50 origin-top transition-all ease-in-out`}>
                             <div className="flex flex-col mx-auto gap-6 items-center justify-center">
                                 <Link href={"/subscriptions"} className="flex items-center text-gray-600 gap-2 font-semibold underline underline-offset-2 text-lg cursor-pointer hover:text-orange-500">
                                     Subscriptions

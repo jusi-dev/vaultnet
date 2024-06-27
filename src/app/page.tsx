@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main className="w-screen m-0 p-0 flex flex-col overflow-x-hidden scroll-smooth">
+    <main className="w-screen m-0 p-0 flex flex-col overflow-x-hidden scroll-smooth z-10">
       <div className="mx-auto w-screen flex flex-col items-center relative">
         <BackgroundDrop />
         {/* Hero Section */}
@@ -257,7 +257,7 @@ export default function Home() {
             So many reasons <br/>to choose VaultNet
           </h2>
           <p className="text-center text-gray-600 text-2xl mt-4">And there are still many more to explore!</p>
-          <div className="text-center flex flex-col md:flex-row items-center justify-center mt-12 md:mt-24 gap-20 gap-y-12">
+          <div className="text-center flex flex-col md:flex-row items-center justify-center mt-12 md:mt-24 gap-20 gap-y-20 md:gap-y-12">
             <div className="flex flex-col items-center md:w-[30%]">
               <div className="h-28">
                 <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Experience unmatched</p>
@@ -275,7 +275,7 @@ export default function Home() {
               <p className="mt-2 text-center h-20">Effortless Synergy — Collaborate with your team like never before. Share and edit files securely in real-time, ensuring everyone stays on the same page without compromising on privacy.</p>
             </div>
             <div className="flex flex-col items-center md:w-[30%]">
-              <div className="h-28">
+              <div className="h-40 md:h-28">
                 <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">Save money with the</p>
                 <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">Pay-As-You-Go</p>
                 <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">hybrid pricing model.</p>
@@ -287,13 +287,13 @@ export default function Home() {
       </div>
 
 
-      <div className="container flex flex-col items-center w-full mt-32 md:mt-60">
+      <div className="container flex flex-col items-center w-full mt-32 md:mt-60 mb-20 md:mb-0">
         <div className="w-full">
           <h2 className="text-5xl md:text-5xl text-gray-800 text-center font-extrabold">
             Your Privacy <br/>Our responsibilities
           </h2>
           <p className="text-center text-gray-600 text-2xl mt-4">Why your data is in the best hands</p>
-          <div className="text-center flex flex-col md:flex-row items-center justify-center mt-12 md:mt-24 gap-20 gap-y-12">
+          <div className="text-center flex flex-col md:flex-row items-center justify-center mt-12 md:mt-24 gap-20 gap-y-20 md:gap-y-12">
             <div className="flex flex-col items-center md:w-[30%]">
               <div className="h-28">
                 <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">State of Art</p>
@@ -303,7 +303,7 @@ export default function Home() {
               <p className="mt-2 text-center h-20">Cutting-Edge Security — Your files are encrypted using industry-leading standards, with each user receiving a unique encryption key. Leveraging the SHA256 encryption to encrypt your files in-transit and at rest.</p>
             </div>
             <div className="flex flex-col items-center md:w-[33%]">
-              <div className="h-28">
+              <div className="h-32 md:h-28">
                 <p className="text-lg text-orange-500 font-semibold drop-shadow-lg">All files are stored</p>
                 <p className="text-5xl text-orange-500 font-semibold drop-shadow-lg">within Switzerland</p>
                 <p className="text-lg text-white font-semibold">.</p>
@@ -343,7 +343,7 @@ export default function Home() {
                 Don't pay ever again for storage which you don't need.{" "}
               </p>
             </div>
-            <div className="flex container flex-col md:flex-row mt-10 md:mt-20 w-[90%] md:w-full gap-8">
+            <div className="flex flex-col md:flex-row mt-10 md:mt-20 md:container md:w-full gap-8">
               <SubscriptionCardFree />
               <SubscriptionCard
                 subscription="Vault L"
@@ -386,18 +386,18 @@ export default function Home() {
                 <p className="md:text-2xl text-gray-700 text-center">
                   This is the easiest and best way to solve my storage problem!
                   I don't even have to worry about the security of my files. So
-                  glad that there is a provider inside of Switzerland!
+                  glad that there is a provider inside of Switzerland! I can finally store all my pictures!
                 </p>
               </div>
               <div className="flex flex-row gap-4 items-center">
                 <Avatar className="w-14 h-14 md:w-20 md:h-20 ">
-                  <AvatarImage src="/avatar.jpg" />
+                  <AvatarImage src="/profile.png" />
                 </Avatar>
                 <div className="flex flex-col">
                   <p className="text-lg md:text-xl text-gray-800 font-semibold">
-                    John Doe
+                    Max Felder
                   </p>
-                  <p className="md:text-lg text-gray-600">CEO of Company X</p>
+                  <p className="md:text-lg text-gray-600">Photographer</p>
                 </div>
               </div>
             </div>

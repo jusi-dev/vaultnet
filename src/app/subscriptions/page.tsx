@@ -24,7 +24,7 @@ export default function DonatePage(): JSX.Element {
       <p className="text-center text-gray-500 mt-2">
         Choose the subscription that fits your needs
       </p>
-      <div className="flex container flex-col md:flex-row mt-10 md:mt-12 w-[90%] md:w-full gap-8">
+      <div className="flex flex-col md:flex-row mt-10 md:mt-12 md:container w-[90%] md:w-full gap-8">
         <SubscriptionCardFree />
         <SubscriptionCard
           subscription="Vault L"
