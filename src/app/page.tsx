@@ -18,13 +18,6 @@ import SubscriptionCardFree from "./subscriptions/_components/subscriptioncardfr
 import SubscriptionCard from "./subscriptions/_components/subscriptioncard";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "VaultNet - The Swiss Dropbox Storage Alternative",
-  description: "VaultNet is the most secure and flexible storage solution in Switzerland. Store your files securely and privately in the heart of the Swiss Alps. VaultNet is the best alternative to Dropbox and Google Drive.",
-  keywords: "vaultnet, storage, switzerland, secure, private, flexible, cheap, easy, dropbox, alternative",
-};
-
-
 export default function Home() {
   return (
     <main className="w-screen m-0 p-0 flex flex-col overflow-x-hidden scroll-smooth z-10">

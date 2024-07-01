@@ -1,3 +1,9 @@
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Contact | VaultNet",
+};
+
 export default function Contact () {
     return (
         <div className="container flex flex-col w-full justify-center mx-auto my-32 min-h-[50vh]">

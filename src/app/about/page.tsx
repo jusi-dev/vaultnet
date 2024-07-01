@@ -1,3 +1,10 @@
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "About Us | VaultNet",
+};
+
+
 export default function TermsOfService() {
     return(
         <div className="container md:w-2/4 my-32">

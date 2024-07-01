@@ -28,8 +28,8 @@ export function Header() {
                     </div>
 
                     <div className="hidden md:flex gap-x-6 justify-center items-center">
-                        <Link href={"/about"} className="text-center flex items-center text-gray-600 gap-2 font-semibold text-lg cursor-pointer hover:text-orange-500">
-                            About
+                        <Link href={"/about"} className="text-center flex flex-col text-nowrap items-center text-gray-600 gap-2 font-semibold text-lg cursor-pointer hover:text-orange-500">
+                            About Us
                         </Link>
                         <Link href={"/contact"} className="text-center flex items-center text-gray-600 gap-2 font-semibold text-lg cursor-pointer hover:text-orange-500">
                             Contact
@@ -79,8 +79,8 @@ export function Header() {
             {/* Mobile Nav */}
             <div className={`fixed top-0 left-0 w-full h-full lg:hidden bg-gray-100 z-40 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out`} style={{ paddingTop: '64px' }}>
                 <div className="flex flex-col mx-auto gap-6 items-center justify-center h-full">
-                    <Link href={"/about"} className="flex items-center text-gray-600 gap-2 font-semibold text-2xl cursor-pointer hover:text-orange-500" onClick={() => setIsOpen(false)}>
-                        About
+                    <Link href={"/about"} className="flex flex-col items-center text-gray-600 gap-2 font-semibold text-2xl cursor-pointer hover:text-orange-500" onClick={() => setIsOpen(false)}>
+                        About Us
                     </Link>
                     <Link href={"/contact"} className="flex items-center text-gray-600 gap-2 font-semibold text-2xl cursor-pointer hover:text-orange-500" onClick={() => setIsOpen(false)}>
                         Contact
