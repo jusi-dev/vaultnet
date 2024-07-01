@@ -19,7 +19,7 @@ export default function SubscriptionCardFree() {
             <div className="flex flex-col w-full mt-10 h-20">
                 <ul className="md:font-semibold">
                 <li className="flex"><Check className="flex-shrink-0"/> 50MB of Storage</li>
-                <li className="flex"><Check className="flex-shrink-0"/> Up to 5 members in a single organization</li>
+                <li className="flex"><Check className="flex-shrink-0"/> Unlimited members in a single organization</li>
                 <li className="flex"><Check className="flex-shrink-0"/> + CHF 1.50 per additional 10 GB </li>
                 </ul>
             </div>

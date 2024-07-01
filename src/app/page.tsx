@@ -357,7 +357,7 @@ export default function Home() {
                 shortDesc="The perfect solution for individuals"
                 subPerks={{
                   storageSize: 200,
-                  members: "Up to 5",
+                  members: "Unlimited",
                   additionalStoragePrice: 1,
                 }}
                 orgPrice="15"

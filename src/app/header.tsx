@@ -44,7 +44,10 @@ export function Header() {
                         </SignedIn>
 
                         <div className="flex gap-4 ml-auto">
-                            <OrganizationSwitcher />
+                            <OrganizationSwitcher 
+                                afterCreateOrganizationUrl={"/dashboard/files"}
+                                afterLeaveOrganizationUrl={"/dashboard/files"}
+                            />
                             <UserButton 
                                 afterSignOutUrl="/"
                             >
