@@ -36,8 +36,6 @@ export default function CheckoutForm(props: CheckoutFormProps): JSX.Element {
     if (uiMode === "embedded") return setClientSecret(client_secret);
 
     window.location.assign(url as string);
-
-
   };
 
   return (
@@ -45,7 +43,7 @@ export default function CheckoutForm(props: CheckoutFormProps): JSX.Element {
       <form action={formAction}>
         <input type="hidden" name="uiMode" value={props.uiMode} />
         <Button variant="orange" className="text-2xl w-full cursor-pointer" size={"landing"} type="submit">
-          Start Now
+          Subscribe
         </Button>
       </form>
       {/* {clientSecret ? (

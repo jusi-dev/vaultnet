@@ -1,10 +1,16 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import CheckoutForm from "./checkoutform";
+import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 
 export default function SubscriptionCard({ subscription, price, shortDesc, topChoice, subPerks, orgPrice } : { subscription: string, price: number, shortDesc: string, topChoice?: boolean, subPerks?: any, orgPrice: string}) {
 
     const { storageSize, members, additionalStoragePrice } = subPerks;
+
+    const user = useUser();
 
     return(
         <div className="flex flex-col md:w-[30vw] bg-white p-12 rounded-lg border-2 border-orange-500 mt-10 drop-shadow-lg">
@@ -34,7 +40,14 @@ export default function SubscriptionCard({ subscription, price, shortDesc, topCh
                 </ul>
             </div>
             <div className="mt-10">
-                <CheckoutForm uiMode="hosted" subscriptionType={subscription}/>
+                { user.isSignedIn 
+                    ?
+                        <CheckoutForm uiMode="hosted" subscriptionType={subscription}/>
+                    :
+                        <Link href={"https://accounts.vaultnet.ch/sign-up?redirect_url=https://vaultnet.ch/subscriptions/"}>
+                            <Button variant="orange" className="text-2xl w-full hover:cursor-pointer" size={"landing"}>Start Now</Button>
+                        </Link>
+                }
                 {/* <Button variant="orange" className="text-2xl w-full hover:cursor-not-allowed" size={"landing"}>Currently not available</Button> */}
                 <p className="text-center font-extralight mt-1">Recurring monthly costs</p>
             </div>
