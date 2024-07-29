@@ -48,6 +48,7 @@
     "pg": "^8.11.5",
     "react": "^18",
     "react-dom": "^18",
+    "react-facebook-pixel": "^1.0.4",
     "react-file-previewer": "^0.6.3",
     "react-hook-form": "^7.51.0",
     "stripe": "^14.24.0",
