@@ -8,6 +8,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { Footer } from "./Footer";
 import Script from "next/script";
 
+import { Analytics } from "@vercel/analytics/react"
+
 const inter = Roboto({ weight: ["100", "300", "400", "500", "700", "900"], style: "normal", preload: false });
 
 export const metadata: Metadata = {
@@ -25,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={` ${inter.className } m-0 p-0 w-screen`}>
+        <Analytics />
         <ConvexClientProvider>
           <Toaster />
           <Header />

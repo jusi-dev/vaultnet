@@ -53,6 +53,8 @@ export async function POST(req: Request) {
           console.log(`💰 CheckoutSession status: ${data.payment_status}`);
           console.log(data)
 
+          sendSlackMessage(`New checkout session: ${data?.customer_email}`)
+
           if(data?.metadata?.payg === "true") {
             await enablePAYG(data?.metadata?.userId, data.customer as string, data.created, data.expires_at)
             sendSlackMessage(`New PAYG customer: ${data?.customer_email}`)
