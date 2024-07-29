@@ -21,6 +21,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/api/uploadfile/route.ts", "src/app/share/[slug]/page.tsx.old"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/api/uploadfile/route.ts", "src/app/share/[slug]/page.tsx.old", "src/actions/slack.ts"],
   "exclude": ["node_modules"]
 }

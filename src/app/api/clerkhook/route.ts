@@ -1,4 +1,5 @@
 import { addOrgIdToUser, createEncryptionKeyForOrg, createUser, deleteOrgIdFromUser, deleteUser, updateRoleInOrgForUser, updateUser } from "@/actions/aws/users";
+import { sendSlackMessage } from "@/actions/slack";
 import { WebhookEvent } from "@clerk/nextjs/server";
 
 export async function POST(req: Request) {
@@ -10,6 +11,7 @@ export async function POST(req: Request) {
         switch (payload.type) {
             case "user.created":
                 await createUser(payload.data);
+                sendSlackMessage(`New user: ${payload.data.email_addresses[0].email_address}, ${payload.data.first_name} ${payload.data.last_name}`);
                 break;
             case "user.updated":
                 await updateUser(payload.data);

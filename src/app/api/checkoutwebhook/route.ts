@@ -7,6 +7,8 @@ import { stripe } from "@/lib/stripe";
 import { currentUser } from "@clerk/nextjs";
 import { calculateOverusedSpace, disablePAYG, enablePAYG, getUserById, resetPAYGUsage, transferPAYGUsage, updateSubscription } from "@/actions/aws/users";
 import { addToPAYG, cancelPAYG } from "@/actions/stripe";
+import { sendSlackMessage } from "@/actions/slack";
+import { send } from "process";
 
 export async function POST(req: Request) {
   let event: Stripe.Event;
@@ -53,8 +55,10 @@ export async function POST(req: Request) {
 
           if(data?.metadata?.payg === "true") {
             await enablePAYG(data?.metadata?.userId, data.customer as string, data.created, data.expires_at)
+            sendSlackMessage(`New PAYG customer: ${data?.customer_email}`)
           } else {
             await updateSubscription(data?.metadata?.userId, data.customer as string, data?.metadata?.subscriptionType as string, data.expires_at)
+            sendSlackMessage(`New subscription has been created: ${data?.customer_email}, ${data?.metadata?.subscriptionType}`)
           }
           break;
         case "payment_intent.payment_failed":
